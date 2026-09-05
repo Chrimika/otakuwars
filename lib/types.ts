@@ -30,7 +30,20 @@ export interface QuizQuestion {
   correctAnswerIndex: number;
   explanation: string;
   animeSource: string;
-  category: 'shonen' | 'seinen' | 'isekai' | 'quotes' | 'hardcore';
+  category:
+    | 'shonen'
+    | 'seinen'
+    | 'isekai'
+    | 'quotes'
+    | 'hardcore'
+    | 'mecha'
+    | 'magical_girl'
+    | 'slice_of_life'
+    | 'sports'
+    | 'thriller'
+    | 'romance'
+    | 'historical'
+    | string;
   difficulty: 'easy' | 'medium' | 'hard';
   badgeEmoji?: string;
 }

@@ -29,6 +29,13 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
     { id: 'isekai', label: 'Isekai', icon: '🗡️' },
     { id: 'quotes', label: 'Citations', icon: '💬' },
     { id: 'hardcore', label: 'Hardcore', icon: '🔥' },
+    { id: 'mecha', label: 'Mecha', icon: '🤖' },
+    { id: 'magical_girl', label: 'Magical Girl', icon: '🌙' },
+    { id: 'slice_of_life', label: 'Tranche de vie', icon: '🎸' },
+    { id: 'sports', label: 'Sports', icon: '⚽' },
+    { id: 'thriller', label: 'Thriller / Mystère', icon: '🕵️' },
+    { id: 'romance', label: 'Romance', icon: '❤️' },
+    { id: 'historical', label: 'Historique', icon: '🌸' },
   ];
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -95,7 +102,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
           {/* Catégorie */}
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-2">Thème</label>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto p-1 bg-white/[0.02] rounded-xl border border-white/8">
               {categories.map((c) => (
                 <button
                   key={c.id}
@@ -173,7 +180,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
             disabled={loading}
             className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all cursor-pointer disabled:opacity-50"
           >
-            {loading ? 'Création dans Firestore...' : 'Lancer le salon'}
+            {loading ? 'Création...' : 'Lancer le salon'}
           </button>
         </form>
       </div>
