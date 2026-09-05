@@ -238,8 +238,12 @@ export async function startGameMatch(roomId: string) {
     updatedPlayers[uid].lastAnswerCorrect = null;
   });
 
+  // Régénérer un TOUT NOUVEAU lot de questions et d'options mélangées à chaque nouvelle partie !
+  const newQuestions = getRandomQuestions(room.totalQuestions || 5, room.category);
+
   await updateDoc(roomRef, {
     state: 'playing',
+    questions: newQuestions,
     currentQuestionIndex: 0,
     questionStartTime: Date.now(),
     players: updatedPlayers,
