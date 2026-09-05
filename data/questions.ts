@@ -1925,6 +1925,15 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   }
 ];
 
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export function getRandomQuestions(count: number = 5, category?: string): QuizQuestion[] {
   let pool = [...OTAKU_QUESTIONS];
   if (category && category !== 'all') {
@@ -1935,7 +1944,20 @@ export function getRandomQuestions(count: number = 5, category?: string): QuizQu
       pool = [...pool, ...remaining];
     }
   }
-  // Shuffle array
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+
+  // 1. Mélange aléatoire des questions (Fisher-Yates)
+  const selectedQuestions = shuffleArray(pool).slice(0, count);
+
+  // 2. Mélange aléatoire pur des 4 options (A, B, C, D) pour chaque question !
+  return selectedQuestions.map((q) => {
+    const correctAnswerText = q.options[q.correctAnswerIndex];
+    const shuffledOptions = shuffleArray(q.options);
+    const newCorrectAnswerIndex = shuffledOptions.indexOf(correctAnswerText);
+
+    return {
+      ...q,
+      options: shuffledOptions,
+      correctAnswerIndex: newCorrectAnswerIndex < 0 ? 0 : newCorrectAnswerIndex,
+    };
+  });
 }
