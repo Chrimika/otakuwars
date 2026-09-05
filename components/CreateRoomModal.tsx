@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserProfile, GameRoom } from '../lib/types';
 import { createGameRoom } from '../lib/gameService';
-import { X, Clock, Swords, Layers } from 'lucide-react';
+import { X, Clock, Swords, Layers, AlertCircle } from 'lucide-react';
 
 interface CreateRoomModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
   const [category, setCategory] = useState('all');
   const [timer, setTimer] = useState(10);
   const [nbQ, setNbQ] = useState(5);
+  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -32,13 +33,20 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     setLoading(true);
     try {
       const room = await createGameRoom(user, roomName.trim() || `Salon de ${user.username}`, category, timer, nbQ);
       onRoomCreated(room);
       onClose();
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      console.error('Erreur création salon:', err);
+      const msg = err instanceof Error ? err.message : 'Erreur lors de la création du salon Firestore.';
+      if (msg.includes('permission-denied') || msg.includes('permission')) {
+        setErrorMsg('Règles Firestore bloquées. Dans Firebase Console -> Firestore Database -> Rules, définissez `allow read, write: if true;` pour autoriser le mode test.');
+      } else {
+        setErrorMsg(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -63,6 +71,13 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
             <p className="text-xs text-slate-500">Configurez votre arène de quiz</p>
           </div>
         </div>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 text-xs flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         <form onSubmit={handleCreate} className="space-y-4">
           {/* Nom */}
@@ -158,7 +173,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
             disabled={loading}
             className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all cursor-pointer disabled:opacity-50"
           >
-            {loading ? 'Création...' : 'Lancer le salon'}
+            {loading ? 'Création dans Firestore...' : 'Lancer le salon'}
           </button>
         </form>
       </div>

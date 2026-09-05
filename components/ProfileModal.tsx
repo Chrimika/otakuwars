@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../lib/types';
 import { OTAKU_AVATARS, getAvatarById } from '../data/avatars';
+import { saveUserProfileToFirestore } from '../lib/gameService';
 import { X, Trophy, Flame, Target, Check, LogOut } from 'lucide-react';
 
 interface ProfileModalProps {
@@ -25,7 +26,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, isOpen, onClos
   const currentAvatar = getAvatarById(avatarId);
   const winRate = user.gamesPlayed > 0 ? Math.round((user.wins / user.gamesPlayed) * 100) : 0;
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated: UserProfile = {
       ...user,
@@ -34,6 +35,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, isOpen, onClos
       avatarId,
       favoriteAnime: favoriteAnime.trim() || user.favoriteAnime,
     };
+    await saveUserProfileToFirestore(updated);
     localStorage.setItem('otakuwars_user', JSON.stringify(updated));
     onUpdate(updated);
     setSaved(true);
@@ -125,7 +127,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, isOpen, onClos
 
           {saved && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-emerald-400 text-xs">
-              <Check className="w-4 h-4 shrink-0" /> Profil enregistré !
+              <Check className="w-4 h-4 shrink-0" /> Profil enregistré dans Firestore !
             </div>
           )}
 

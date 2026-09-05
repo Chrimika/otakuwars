@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../lib/types';
 import { OTAKU_AVATARS } from '../data/avatars';
-import { X, Sparkles, LogIn, Zap } from 'lucide-react';
+import { X, Sparkles, LogIn } from 'lucide-react';
 import { getFirebaseInstance } from '../lib/firebase';
-import { signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { saveUserProfileToFirestore, getUserProfileFromFirestore } from '../lib/gameService';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -66,6 +67,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           isGuest: false,
           createdAt: Date.now(),
         };
+
+        // Enregistrement simultané local + Firestore `users/{uid}`
+        await saveUserProfileToFirestore(profile);
         localStorage.setItem('otakuwars_user', JSON.stringify(profile));
         onSuccess(profile);
 
@@ -89,24 +93,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           }
         }
 
-        const stored = localStorage.getItem('otakuwars_user');
-        const profile: UserProfile = stored ? JSON.parse(stored) : {
-          uid,
-          username: email.split('@')[0],
-          email,
-          otakuTitle: avatarObj.title,
-          avatarId: avatarObj.id,
-          favoriteAnime: 'One Piece',
-          gamesPlayed: 0,
-          wins: 0,
-          totalScore: 0,
-          isGuest: false,
-          createdAt: Date.now(),
-        };
-        profile.uid = uid;
-        profile.isGuest = false;
-        localStorage.setItem('otakuwars_user', JSON.stringify(profile));
-        onSuccess(profile);
+        // Tenter de récupérer le profil complet depuis Firestore `users/{uid}`
+        let profile = await getUserProfileFromFirestore(uid);
+
+        if (!profile) {
+          const stored = localStorage.getItem('otakuwars_user');
+          profile = stored ? JSON.parse(stored) : {
+            uid,
+            username: email.split('@')[0],
+            email,
+            otakuTitle: avatarObj.title,
+            avatarId: avatarObj.id,
+            favoriteAnime: 'One Piece',
+            gamesPlayed: 0,
+            wins: 0,
+            totalScore: 0,
+            isGuest: false,
+            createdAt: Date.now(),
+          };
+          if (profile) profile.uid = uid;
+        }
+
+        if (profile) {
+          profile.isGuest = false;
+          await saveUserProfileToFirestore(profile);
+          localStorage.setItem('otakuwars_user', JSON.stringify(profile));
+          onSuccess(profile);
+        }
       }
     } catch {
       setErrorMsg('Une erreur inattendue est survenue.');

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserProfile, GameRoom } from '../lib/types';
 import { joinGameRoom } from '../lib/gameService';
-import { X, KeyRound, LogIn } from 'lucide-react';
+import { X, KeyRound, LogIn, AlertCircle } from 'lucide-react';
 
 interface JoinRoomModalProps {
   isOpen: boolean;
@@ -28,10 +28,20 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, user, onCl
     setLoading(true);
     try {
       const room = await joinGameRoom(code, user);
-      if (room) { onJoined(room); onClose(); }
-      else setError('Salon introuvable. Vérifiez le code.');
-    } catch {
-      setError('Impossible de rejoindre le salon.');
+      if (room) {
+        onJoined(room);
+        onClose();
+      } else {
+        setError('Salon introuvable dans Firestore. Vérifiez le code.');
+      }
+    } catch (err: unknown) {
+      console.error('Erreur join room Firestore:', err);
+      const msg = err instanceof Error ? err.message : 'Impossible de rejoindre le salon.';
+      if (msg.includes('permission-denied') || msg.includes('permission')) {
+        setError('Accès Firestore refusé par les règles de sécurité Firebase.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -58,8 +68,9 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, user, onCl
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 text-xs">
-            {error}
+          <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 text-xs flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
           </div>
         )}
 
@@ -78,7 +89,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, user, onCl
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all cursor-pointer disabled:opacity-50"
           >
             <LogIn className="w-4 h-4" />
-            {loading ? 'Recherche...' : 'Rejoindre'}
+            {loading ? 'Recherche dans Firestore...' : 'Rejoindre'}
           </button>
         </form>
       </div>
