@@ -24,7 +24,6 @@ export function generateRoomCode(): string {
   return `OTK-${code}`;
 }
 
-// Helper to get Firestore instance or throw clear error
 function getRequiredDb(): Firestore {
   const { db, isConfigured } = getFirebaseInstance();
   if (!isConfigured || !db) {
@@ -119,6 +118,8 @@ export async function createGameRoom(
     isReady: true,
     score: 0,
     streak: 0,
+    currentQuestionIndex: 0,
+    hasFinished: false,
     joinedAt: Date.now(),
   };
 
@@ -140,14 +141,13 @@ export async function createGameRoom(
     updatedAt: Date.now(),
   };
 
-  // Direct Firestore write (no silent fallback!)
   await setDoc(doc(db, 'rooms', roomId), newRoom);
   console.log(`✅ Salon créé dans Firestore [${roomId}] (Code: ${roomCode})`);
 
   return newRoom;
 }
 
-// ── 4. Join a Game Room (Query Firestore by Code or ID) ─────────────────────────
+// ── 4. Join a Game Room ─────────────────────────────────────────────────────────
 
 export async function joinGameRoom(
   codeOrId: string,
@@ -159,12 +159,10 @@ export async function joinGameRoom(
   let room: GameRoom | null = null;
   let roomDocRef = doc(db, 'rooms', rawInput);
 
-  // Try direct fetch by Document ID
   const directSnap = await getDoc(roomDocRef);
   if (directSnap.exists()) {
     room = directSnap.data() as GameRoom;
   } else {
-    // Search by code property in Firestore
     const q = query(
       collection(db, 'rooms'),
       where('code', '==', code),
@@ -179,7 +177,7 @@ export async function joinGameRoom(
   }
 
   if (!room) {
-    return null; // Room not found in Firestore
+    return null;
   }
 
   const player: RoomPlayer = {
@@ -191,21 +189,21 @@ export async function joinGameRoom(
     isReady: false,
     score: 0,
     streak: 0,
+    currentQuestionIndex: 0,
+    hasFinished: false,
     joinedAt: Date.now(),
   };
 
-  // Update room player list in Firestore directly
   await updateDoc(roomDocRef, {
     [`players.${user.uid}`]: player,
     updatedAt: Date.now(),
   });
 
   room.players[user.uid] = player;
-  console.log(`✅ Joueur ${user.username} a rejoint le salon Firestore [${room.id}]`);
   return room;
 }
 
-// ── 5. Toggle Ready status in Firestore ────────────────────────────────────────
+// ── 5. Toggle Ready status ─────────────────────────────────────────────────────
 
 export async function togglePlayerReady(
   roomId: string,
@@ -233,6 +231,8 @@ export async function startGameMatch(roomId: string) {
   Object.keys(updatedPlayers).forEach((uid) => {
     updatedPlayers[uid].score = 0;
     updatedPlayers[uid].streak = 0;
+    updatedPlayers[uid].currentQuestionIndex = 0;
+    updatedPlayers[uid].hasFinished = false;
     updatedPlayers[uid].lastAnswerIndex = null;
     updatedPlayers[uid].lastAnswerTimeMs = null;
     updatedPlayers[uid].lastAnswerCorrect = null;
@@ -247,11 +247,12 @@ export async function startGameMatch(roomId: string) {
   });
 }
 
-// ── 7. Submit Answer in Firestore ──────────────────────────────────────────────
+// ── 7. Submit Answer for a Player (Individual Progress) ─────────────────────────
 
 export async function submitQuestionAnswer(
   roomId: string,
   playerUid: string,
+  questionIdx: number,
   answerIndex: number,
   timeTakenMs: number
 ) {
@@ -263,10 +264,10 @@ export async function submitQuestionAnswer(
   const room = snap.data() as GameRoom;
   if (room.state !== 'playing' || !room.players[playerUid]) return;
 
-  const currentQ = room.questions[room.currentQuestionIndex];
+  const player = { ...room.players[playerUid] };
+  const currentQ = room.questions[questionIdx];
   if (!currentQ) return;
 
-  const player = { ...room.players[playerUid] };
   const isCorrect = answerIndex === currentQ.correctAnswerIndex;
 
   if (isCorrect) {
@@ -282,58 +283,54 @@ export async function submitQuestionAnswer(
     player.streak = 0;
   }
 
+  const nextQ = questionIdx + 1;
+  player.currentQuestionIndex = nextQ;
   player.lastAnswerIndex = answerIndex;
   player.lastAnswerTimeMs = timeTakenMs;
   player.lastAnswerCorrect = isCorrect;
 
-  await updateDoc(roomRef, {
+  if (nextQ >= room.totalQuestions) {
+    player.hasFinished = true;
+  }
+
+  const updatedPlayers = {
+    ...room.players,
+    [playerUid]: player,
+  };
+
+  // Check if ALL players in the room have finished
+  const allFinished = Object.values(updatedPlayers).every((p) => p.hasFinished);
+
+  const updateData: Record<string, unknown> = {
     [`players.${playerUid}`]: player,
     updatedAt: Date.now(),
-  });
+  };
+
+  if (allFinished) {
+    updateData.state = 'game_over';
+  }
+
+  await updateDoc(roomRef, updateData);
 }
 
-// ── 8. Advance Question in Firestore ─────────────────────────────────────────
+// ── 8. Force End Match (Host can finish game early if needed) ──────────────────
 
 export async function advanceToNextQuestion(roomId: string) {
   const db = getRequiredDb();
   const roomRef = doc(db, 'rooms', roomId);
-  const snap = await getDoc(roomRef);
-  if (!snap.exists()) return;
-
-  const room = snap.data() as GameRoom;
-  const next = room.currentQuestionIndex + 1;
-
-  if (next >= room.totalQuestions) {
-    await updateDoc(roomRef, {
-      state: 'game_over',
-      updatedAt: Date.now(),
-    });
-  } else {
-    const updatedPlayers = { ...room.players };
-    Object.keys(updatedPlayers).forEach((uid) => {
-      updatedPlayers[uid].lastAnswerIndex = null;
-      updatedPlayers[uid].lastAnswerTimeMs = null;
-      updatedPlayers[uid].lastAnswerCorrect = null;
-    });
-
-    await updateDoc(roomRef, {
-      state: 'playing',
-      currentQuestionIndex: next,
-      questionStartTime: Date.now(),
-      players: updatedPlayers,
-      updatedAt: Date.now(),
-    });
-  }
+  await updateDoc(roomRef, {
+    state: 'game_over',
+    updatedAt: Date.now(),
+  });
 }
 
-// ── 9. User Profile Firestore Persistence (collection 'users') ─────────────────
+// ── 9. User Profile Persistence ────────────────────────────────────────────────
 
 export async function saveUserProfileToFirestore(user: UserProfile) {
   try {
     const { db, isConfigured } = getFirebaseInstance();
     if (isConfigured && db) {
       await setDoc(doc(db as Firestore, 'users', user.uid), user, { merge: true });
-      console.log(`✅ Profil joueur ${user.username} enregistré dans Firestore [users/${user.uid}]`);
     }
   } catch (e) {
     console.error('❌ Erreur écriture profil utilisateur Firestore :', e);

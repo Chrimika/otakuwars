@@ -57,6 +57,8 @@ export interface RoomPlayer {
   isReady: boolean;
   score: number;
   streak: number;
+  currentQuestionIndex?: number;
+  hasFinished?: boolean;
   lastAnswerIndex?: number | null;
   lastAnswerTimeMs?: number | null;
   lastAnswerCorrect?: boolean | null;
