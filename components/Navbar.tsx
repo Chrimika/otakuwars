@@ -3,8 +3,7 @@
 import React from 'react';
 import { UserProfile } from '../lib/types';
 import { getAvatarById } from '../data/avatars';
-import { Shield, Sparkles, User, Flame, Database, Plus, LogIn } from 'lucide-react';
-import { getFirebaseInstance } from '../lib/firebase';
+import { Flame, Plus, LogIn, KeyRound, Sparkles } from 'lucide-react';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -12,7 +11,7 @@ interface NavbarProps {
   onOpenProfile: () => void;
   onOpenCreateRoom: () => void;
   onOpenJoinRoom: () => void;
-  onOpenFirebaseConfig: () => void;
+  onOpenFirebaseConfig?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,105 +20,94 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenProfile,
   onOpenCreateRoom,
   onOpenJoinRoom,
-  onOpenFirebaseConfig,
 }) => {
   const avatar = user ? getAvatarById(user.avatarId) : null;
-  const { isConfigured } = getFirebaseInstance();
+  const isLoggedIn = user && !user.isGuest;
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-purple-900/40 px-4 lg:px-8 py-3 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.location.reload()}>
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-amber-400 p-[2px] shadow-lg shadow-purple-500/30 group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <Flame className="w-6 h-6 text-amber-400 animate-pulse" />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">
-                OTAKU WARS
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-700/50">
-                QUIZ LIVE
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 hidden sm:block">L\'arène ultime des passionnés d\'Animes</p>
-          </div>
-        </div>
+    <header className="sticky top-0 z-40 bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
 
-        {/* Center / Quick Room Actions */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Logo */}
+        <button
+          onClick={() => window.location.reload()}
+          className="flex items-center gap-2.5 cursor-pointer"
+        >
+          <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/30">
+            <Flame className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-black text-base tracking-wide text-white hidden sm:block">
+            OTAKU WARS
+          </span>
+        </button>
+
+        {/* Center actions (desktop) */}
+        <div className="hidden md:flex items-center gap-2">
           <button
             onClick={onOpenCreateRoom}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-sm shadow-md shadow-purple-600/30 hover:shadow-purple-500/50 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            Créer un Salon
+            <Plus className="w-3.5 h-3.5" />
+            Créer un salon
           </button>
           <button
             onClick={onOpenJoinRoom}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-medium text-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium text-xs transition-all cursor-pointer"
           >
+            <KeyRound className="w-3.5 h-3.5 text-violet-400" />
             Rejoindre
           </button>
         </div>
 
-        {/* Right Section: Firebase Status + User Profile */}
-        <div className="flex items-center gap-3">
-          {/* Firebase Connection Status Button */}
-          <button
-            onClick={onOpenFirebaseConfig}
-            title={isConfigured ? 'Firebase Connecté en Temps Réel' : 'Cliquez pour configurer votre projet Firebase'}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
-              isConfigured
-                ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                : 'bg-amber-950/60 border-amber-500/40 text-amber-300 hover:bg-amber-900/60'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isConfigured ? 'Firebase Actif' : 'Firebase Sync'}</span>
-            <span className={`w-2 h-2 rounded-full ${isConfigured ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
-          </button>
-
-          {/* User Profile Info or Sign-in button */}
-          {user ? (
+        {/* Right: user or login */}
+        <div className="flex items-center gap-2">
+          {isLoggedIn ? (
             <button
               onClick={onOpenProfile}
-              className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-slate-900/90 border border-purple-500/30 hover:border-purple-400/60 hover:bg-slate-800 transition-all cursor-pointer group"
+              className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-white/5 hover:bg-white/8 border border-white/10 transition-all cursor-pointer"
             >
               <div
-                className="w-9 h-9 rounded-full p-0.5 flex items-center justify-center overflow-hidden shadow-inner"
-                style={{ backgroundColor: avatar?.accentColor || '#8b5cf6' }}
+                className="w-7 h-7 rounded-full p-0.5 overflow-hidden"
+                style={{ backgroundColor: avatar?.accentColor || '#7c3aed' }}
               >
                 <div
-                  className="w-full h-full rounded-full flex items-center justify-center bg-slate-950"
+                  className="w-full h-full rounded-full bg-[#0a0a0f] flex items-center justify-center"
                   dangerouslySetInnerHTML={{ __html: avatar?.avatarSvg || '' }}
                 />
               </div>
-              <div className="text-left hidden sm:block">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm text-slate-100 group-hover:text-purple-300 transition-colors">
-                    {user.username}
-                  </span>
-                  <Sparkles className="w-3 h-3 text-amber-400" />
-                </div>
-                <span className="text-[11px] text-purple-400 block -mt-0.5 truncate max-w-[120px]">
-                  {user.otakuTitle}
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-white hidden sm:block max-w-[100px] truncate">
+                {user!.username}
+              </span>
             </button>
           ) : (
             <button
               onClick={onOpenAuth}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm shadow-md shadow-purple-600/30 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer"
             >
-              <LogIn className="w-4 h-4" />
-              Se Connecter / S\'inscrire
+              <LogIn className="w-3.5 h-3.5" />
+              <span className="hidden sm:block">Se connecter</span>
+              <span className="sm:hidden">Login</span>
             </button>
           )}
         </div>
+      </div>
+
+      {/* Mobile action bar */}
+      <div className="md:hidden flex items-center gap-2 mt-2 pt-2 border-t border-white/5">
+        <button
+          onClick={onOpenCreateRoom}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Créer un salon
+        </button>
+        <button
+          onClick={onOpenJoinRoom}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-medium text-xs transition-all cursor-pointer"
+        >
+          <KeyRound className="w-3.5 h-3.5 text-violet-400" />
+          Rejoindre
+        </button>
       </div>
     </header>
   );

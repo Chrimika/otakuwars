@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserProfile, GameRoom } from '../lib/types';
 import { joinGameRoom } from '../lib/gameService';
-import { X, KeyRound, LogIn, Sparkles } from 'lucide-react';
+import { X, KeyRound, LogIn } from 'lucide-react';
 
 interface JoinRoomModalProps {
   isOpen: boolean;
@@ -12,95 +12,73 @@ interface JoinRoomModalProps {
   onJoined: (room: GameRoom) => void;
 }
 
-export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
-  isOpen,
-  user,
-  onClose,
-  onJoined,
-}) => {
+export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, user, onClose, onJoined }) => {
   const [roomCode, setRoomCode] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
+    setError('');
     const code = roomCode.trim().toUpperCase();
-
-    if (!code) {
-      setErrorMsg('Veuillez saisir un code de salon valide.');
-      return;
-    }
+    if (!code) { setError('Entrez un code de salon.'); return; }
 
     setLoading(true);
     try {
       const room = await joinGameRoom(code, user);
-      if (room) {
-        onJoined(room);
-        onClose();
-      } else {
-        setErrorMsg('Salon introuvable. Vérifiez le code de salon et réessayez.');
-      }
-    } catch (e) {
-      console.error(e);
-      setErrorMsg('Impossible de rejoindre le salon.');
+      if (room) { onJoined(room); onClose(); }
+      else setError('Salon introuvable. Vérifiez le code.');
+    } catch {
+      setError('Impossible de rejoindre le salon.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-md bg-slate-900 border border-purple-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/80">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-sm bg-[#111118] border border-white/10 rounded-2xl p-6 shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 mb-3 text-white shadow-lg shadow-cyan-500/30">
-            <KeyRound className="w-8 h-8" />
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
+            <KeyRound className="w-5 h-5 text-violet-400" />
           </div>
-          <h2 className="text-2xl font-black text-white tracking-wide">
-            REJOINDRE UN SALON
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Entrez le code d\'invitation partagé par l\'hôte de la partie
-          </p>
+          <div>
+            <h2 className="text-lg font-black text-white">Rejoindre un salon</h2>
+            <p className="text-xs text-slate-500">Entrez le code partagé par l&apos;hôte</p>
+          </div>
         </div>
 
-        {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-red-950/80 border border-red-500/50 text-red-300 text-xs font-medium">
-            {errorMsg}
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 text-xs">
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleJoin} className="space-y-5">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 text-center">
-              Code du Salon (Ex: OTK-AB12)
-            </label>
-            <input
-              type="text"
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
-              placeholder="OTK-XXXX"
-              className="w-full px-4 py-4 rounded-2xl bg-slate-950 border border-slate-700 text-center font-mono font-extrabold text-2xl tracking-widest text-cyan-300 uppercase focus:border-cyan-400 focus:outline-none transition-colors"
-              required
-            />
-          </div>
-
+        <form onSubmit={handleJoin} className="space-y-3">
+          <input
+            type="text"
+            value={roomCode}
+            onChange={(e) => setRoomCode(e.target.value)}
+            placeholder="OTK-XXXX"
+            className="w-full px-4 py-4 rounded-xl bg-white/5 border border-white/10 text-center font-mono font-black text-2xl tracking-widest text-violet-300 uppercase focus:border-violet-500 focus:outline-none transition-colors"
+            required
+          />
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-extrabold text-sm tracking-wider uppercase shadow-xl shadow-cyan-500/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all cursor-pointer disabled:opacity-50"
           >
-            <LogIn className="w-5 h-5" />
-            {loading ? 'Recherche du Salon...' : 'Entrer dans le Salon ⚡'}
+            <LogIn className="w-4 h-4" />
+            {loading ? 'Recherche...' : 'Rejoindre'}
           </button>
         </form>
       </div>
