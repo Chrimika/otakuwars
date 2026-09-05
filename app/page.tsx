@@ -11,7 +11,8 @@ import { JoinRoomModal } from '../components/JoinRoomModal';
 import { RoomLobby } from '../components/RoomLobby';
 import { QuizGame } from '../components/QuizGame';
 import { Leaderboard } from '../components/Leaderboard';
-import { joinGameRoom, subscribeToPublicRooms } from '../lib/gameService';
+import { GlobalLeaderboardModal } from '../components/GlobalLeaderboardModal';
+import { joinGameRoom, subscribeToPublicRooms, recordMatchResults } from '../lib/gameService';
 import { initFirebase } from '../lib/firebase';
 import { Swords, Users, Clock, Trophy, Sparkles, KeyRound, Radio, ArrowRight, Zap } from 'lucide-react';
 
@@ -34,6 +35,7 @@ function HomeContent() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
+  const [isGlobalLeaderboardOpen, setIsGlobalLeaderboardOpen] = useState(false);
 
   // ── Initialise user (guest par défaut, jamais null) ───────────────────────
   // ── Initialise Firebase en premier (côté client uniquement) ───────────────
@@ -93,7 +95,13 @@ function HomeContent() {
   const handleRoomJoined  = (room: GameRoom) => { setActiveRoom(room); setViewState('lobby'); };
   const handleLeaveRoom   = () => { setActiveRoom(null); setViewState('home'); };
   const handleGameStarted = (room: GameRoom) => { setActiveRoom(room); setViewState('game'); };
-  const handleGameOver    = (room: GameRoom) => { setActiveRoom(room); setViewState('leaderboard'); };
+  const handleGameOver    = (room: GameRoom) => {
+    if (user && !user.isGuest) {
+      recordMatchResults(room, user).then(setUser);
+    }
+    setActiveRoom(room);
+    setViewState('leaderboard');
+  };
 
   const handleDirectJoin = async (r: GameRoom) => {
     if (!user || user.isGuest) { openAuth(); return; }
@@ -115,6 +123,7 @@ function HomeContent() {
         onOpenProfile={() => setIsProfileOpen(true)}
         onOpenCreateRoom={() => requireAuth(user, () => setIsCreateRoomOpen(true), openAuth)}
         onOpenJoinRoom={() => requireAuth(user, () => setIsJoinRoomOpen(true), openAuth)}
+        onOpenLeaderboard={() => setIsGlobalLeaderboardOpen(true)}
       />
 
       <main className="flex-1 z-10">
@@ -303,6 +312,7 @@ function HomeContent() {
             user={user}
             onRematch={() => handleRoomCreated(activeRoom)}
             onHome={handleLeaveRoom}
+            onUpdateUser={setUser}
           />
         )}
       </main>
@@ -324,6 +334,12 @@ function HomeContent() {
           setUser(null);
           setIsProfileOpen(false);
         }}
+      />
+
+      <GlobalLeaderboardModal
+        isOpen={isGlobalLeaderboardOpen}
+        onClose={() => setIsGlobalLeaderboardOpen(false)}
+        currentUser={user}
       />
 
       {user && !user.isGuest && (

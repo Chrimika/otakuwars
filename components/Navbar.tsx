@@ -3,7 +3,7 @@
 import React from 'react';
 import { UserProfile } from '../lib/types';
 import { getAvatarById } from '../data/avatars';
-import { Flame, Plus, LogIn, KeyRound, Sparkles } from 'lucide-react';
+import { Flame, Plus, LogIn, KeyRound, Trophy } from 'lucide-react';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -11,6 +11,7 @@ interface NavbarProps {
   onOpenProfile: () => void;
   onOpenCreateRoom: () => void;
   onOpenJoinRoom: () => void;
+  onOpenLeaderboard: () => void;
   onOpenFirebaseConfig?: () => void;
 }
 
@@ -20,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenProfile,
   onOpenCreateRoom,
   onOpenJoinRoom,
+  onOpenLeaderboard,
 }) => {
   const avatar = user ? getAvatarById(user.avatarId) : null;
   const isLoggedIn = user && !user.isGuest;
@@ -57,10 +59,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             <KeyRound className="w-3.5 h-3.5 text-violet-400" />
             Rejoindre
           </button>
+          <button
+            onClick={onOpenLeaderboard}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-medium text-xs transition-all cursor-pointer"
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            Classement
+          </button>
         </div>
 
         {/* Right: user or login */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenLeaderboard}
+            className="md:hidden flex items-center justify-center p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 transition-all cursor-pointer"
+            title="Classement général"
+          >
+            <Trophy className="w-4 h-4" />
+          </button>
+
           {isLoggedIn ? (
             <button
               onClick={onOpenProfile}
@@ -112,3 +129,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+

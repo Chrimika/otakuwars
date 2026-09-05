@@ -355,3 +355,82 @@ export async function getUserProfileFromFirestore(uid: string): Promise<UserProf
   }
   return null;
 }
+
+// ── 10. Record Match Results & Global Leaderboard ────────────────────────────
+
+/**
+ * Enregistre les statistiques d'un joueur à la fin d'une partie.
+ * Incrémente les victoires, les parties jouées et les points totaux dans Firestore et LocalStorage.
+ * Empêche les enregistrements en double grâce à une clé de verrouillage par salon et UID.
+ */
+export async function recordMatchResults(
+  room: GameRoom,
+  user: UserProfile
+): Promise<UserProfile> {
+  if (!user || user.isGuest) return user;
+
+  const lockKey = `otk_recorded_${room.id}_${user.uid}`;
+  if (typeof window !== 'undefined' && sessionStorage.getItem(lockKey)) {
+    return user;
+  }
+
+  const players = Object.values(room.players || {});
+  const player = players.find((p) => p.uid === user.uid);
+  if (!player) return user;
+
+  // Déterminer si le joueur a gagné (plus haut score du salon > 0)
+  const maxScore = Math.max(...players.map((p) => p.score || 0));
+  const isWinner = (player.score || 0) === maxScore && maxScore > 0;
+
+  const updated: UserProfile = {
+    ...user,
+    gamesPlayed: (user.gamesPlayed || 0) + 1,
+    wins: (user.wins || 0) + (isWinner ? 1 : 0),
+    totalScore: (user.totalScore || 0) + (player.score || 0),
+  };
+
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(lockKey, 'true');
+    localStorage.setItem('otakuwars_user', JSON.stringify(updated));
+  }
+
+  await saveUserProfileToFirestore(updated);
+  console.log(`🏆 Stats de ${user.username} mises à jour dans Firestore ! Victoires: ${updated.wins}, Parties: ${updated.gamesPlayed}`);
+  return updated;
+}
+
+/**
+ * Récupère le classement général des joueurs depuis Firestore.
+ */
+export async function getGlobalLeaderboard(limitCount = 50): Promise<UserProfile[]> {
+  try {
+    const { db, isConfigured } = getFirebaseInstance();
+    if (isConfigured && db) {
+      const q = query(collection(db as Firestore, 'users'), limit(100));
+      const snap = await getDocs(q);
+      const users: UserProfile[] = [];
+      snap.forEach((docSnap) => {
+        if (docSnap.exists()) {
+          const u = docSnap.data() as UserProfile;
+          if (!u.isGuest) {
+            users.push(u);
+          }
+        }
+      });
+
+      // Tri décroissant par victoires puis par score total
+      users.sort((a, b) => {
+        if ((b.wins || 0) !== (a.wins || 0)) {
+          return (b.wins || 0) - (a.wins || 0);
+        }
+        return (b.totalScore || 0) - (a.totalScore || 0);
+      });
+
+      return users.slice(0, limitCount);
+    }
+  } catch (e) {
+    console.error('❌ Erreur récupération classement général :', e);
+  }
+  return [];
+}
+

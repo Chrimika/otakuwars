@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { GameRoom, UserProfile } from '../lib/types';
 import { getAvatarById } from '../data/avatars';
+import { recordMatchResults } from '../lib/gameService';
 import { soundFx } from '../lib/soundEffects';
 import confetti from 'canvas-confetti';
 import { Trophy, RefreshCw, Home } from 'lucide-react';
@@ -12,18 +13,26 @@ interface LeaderboardProps {
   user: UserProfile;
   onRematch: () => void;
   onHome: () => void;
+  onUpdateUser?: (updated: UserProfile) => void;
 }
 
-export const Leaderboard: React.FC<LeaderboardProps> = ({ room, user, onRematch, onHome }) => {
+export const Leaderboard: React.FC<LeaderboardProps> = ({ room, user, onRematch, onHome, onUpdateUser }) => {
   useEffect(() => {
     soundFx.playVictory();
     try {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } catch { /* ignore */ }
-  }, []);
+
+    if (room && user && !user.isGuest) {
+      recordMatchResults(room, user).then((updated) => {
+        if (onUpdateUser) onUpdateUser(updated);
+      });
+    }
+  }, [room, user, onUpdateUser]);
 
   const players = Object.values(room.players || {}).sort((a, b) => b.score - a.score);
   const medals = ['🥇', '🥈', '🥉'];
+
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 animate-fade-in">

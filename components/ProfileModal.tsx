@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { UserProfile } from '../lib/types';
 import { OTAKU_AVATARS, getAvatarById } from '../data/avatars';
 import { saveUserProfileToFirestore } from '../lib/gameService';
-import { X, Trophy, Flame, Target, Check, LogOut } from 'lucide-react';
+import { X, Trophy, Flame, Target, Check, LogOut, Swords } from 'lucide-react';
 
 interface ProfileModalProps {
   user: UserProfile | null;
@@ -24,7 +24,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, isOpen, onClos
   if (!isOpen || !user) return null;
 
   const currentAvatar = getAvatarById(avatarId);
-  const winRate = user.gamesPlayed > 0 ? Math.round((user.wins / user.gamesPlayed) * 100) : 0;
+  const gamesPlayed = user.gamesPlayed || 0;
+  const wins = user.wins || 0;
+  const totalScore = user.totalScore || 0;
+  const winRate = gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 100) : 0;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,11 +74,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, isOpen, onClos
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
           {[
-            { icon: <Trophy className="w-4 h-4 text-amber-400" />, val: user.wins, label: 'Victoires' },
+            { icon: <Trophy className="w-4 h-4 text-amber-400" />, val: wins, label: 'Victoires' },
+            { icon: <Swords className="w-4 h-4 text-indigo-400" />, val: gamesPlayed, label: 'Parties' },
             { icon: <Target className="w-4 h-4 text-violet-400" />, val: `${winRate}%`, label: 'Win rate' },
-            { icon: <Flame className="w-4 h-4 text-pink-400" />, val: user.totalScore, label: 'Points' },
+            { icon: <Flame className="w-4 h-4 text-pink-400" />, val: totalScore, label: 'Points' },
           ].map((s) => (
             <div key={s.label} className="p-3 rounded-xl bg-white/[0.03] border border-white/8 text-center">
               <div className="flex justify-center mb-1">{s.icon}</div>
