@@ -6,6 +6,8 @@ import { subscribeToRoom, submitQuestionAnswer, advanceToNextQuestion } from '..
 import { getAvatarById } from '../data/avatars';
 import { soundFx } from '../lib/soundEffects';
 import { Clock, Flame, CheckCircle2, XCircle, Sparkles, Trophy, Check, Hourglass, ArrowRight } from 'lucide-react';
+import { NeonButton } from './ui/NeonButton';
+import { Panel } from './ui/Panel';
 
 interface QuizGameProps {
   roomId: string;
@@ -77,7 +79,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
   if (!room || room.state !== 'playing') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mb-3" />
+        <div className="w-10 h-10 border-2 border-crimson border-t-transparent rounded-full animate-spin mb-3" />
         <p className="text-sm text-slate-400">Chargement de la partie...</p>
       </div>
     );
@@ -96,27 +98,27 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
 
     return (
       <div className="max-w-xl mx-auto px-4 py-8 text-center animate-fade-in">
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#111118] border border-white/10 shadow-2xl mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <Trophy className="w-8 h-8 text-amber-400" />
+        <Panel glow="gold" className="p-6 sm:p-8 mb-6">
+          <div className="clip-corner-sm w-16 h-16 bg-neon-gold/10 border border-neon-gold/40 flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <Trophy className="w-8 h-8 text-neon-gold" />
           </div>
 
-          <h2 className="text-2xl font-black text-white mb-1">Quiz Terminé !</h2>
+          <h2 className="text-2xl font-display font-black text-white mb-1">Quiz Terminé !</h2>
           <p className="text-sm text-slate-400 mb-6">
-            Votre score : <span className="text-amber-400 font-black text-lg">{myPlayer?.score || 0} pts</span>
+            Votre score : <span className="text-neon-gold font-black text-lg">{myPlayer?.score || 0} pts</span>
           </p>
 
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/8 mb-6">
+          <div className="p-4 clip-corner-sm bg-white/[0.03] border border-white/8 mb-6">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
               <span className="flex items-center gap-1.5">
-                <Hourglass className="w-4 h-4 text-violet-400 animate-spin" />
+                <Hourglass className="w-4 h-4 text-crimson animate-spin" />
                 Progression des joueurs
               </span>
               <span className="text-white font-bold">{finishedCount} / {totalCount} ont fini</span>
             </div>
             <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4">
               <div
-                className="h-full bg-gradient-to-r from-violet-500 to-amber-400 transition-all duration-500"
+                className="h-full bg-crimson transition-all duration-500"
                 style={{ width: `${(finishedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -139,7 +141,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
                         style={{ backgroundColor: av.accentColor }}
                       >
                         <div
-                          className="w-full h-full rounded-full bg-[#0a0a0f]"
+                          className="w-full h-full rounded-full bg-void"
                           dangerouslySetInnerHTML={{ __html: av.avatarSvg }}
                         />
                       </div>
@@ -154,7 +156,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
                         <Check className="w-3.5 h-3.5" /> Terminé
                       </span>
                     ) : (
-                      <span className="text-[11px] font-semibold text-violet-300 bg-violet-950/60 px-2 py-0.5 rounded-lg border border-violet-800/40">
+                      <span className="text-[11px] font-semibold text-crimson bg-crimson/10 px-2 py-0.5 rounded-lg border border-crimson/30">
                         Q{Math.min(pQ + 1, room.totalQuestions)}/{room.totalQuestions}
                       </span>
                     )}
@@ -165,12 +167,9 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
           </div>
 
           {isHost && (
-            <button
-              onClick={() => advanceToNextQuestion(roomId)}
-              className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-black text-sm transition-all shadow-lg shadow-violet-900/40 cursor-pointer flex items-center justify-center gap-2"
-            >
-              Afficher le classement final 🏆
-            </button>
+            <NeonButton variant="primary" className="w-full bg-neon-gold!" onClick={() => advanceToNextQuestion(roomId)}>
+              Afficher le classement final
+            </NeonButton>
           )}
 
           {!isHost && (
@@ -178,7 +177,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
               Le classement général s&apos;affichera dès que tout le monde aura terminé...
             </p>
           )}
-        </div>
+        </Panel>
       </div>
     );
   }
@@ -224,32 +223,32 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-fade-in">
       {/* Top bar */}
       <div className="flex items-center justify-between mb-5 gap-3">
-        <span className="text-xs text-slate-500 font-semibold">
+        <span className="text-xs text-slate-500 font-hud font-semibold uppercase tracking-wide">
           Question <span className="text-white font-black">{qIdx + 1}</span> / {room.totalQuestions}
         </span>
 
         {/* Timer */}
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${urgent ? 'border-red-800/60 bg-red-950/40' : 'border-white/10 bg-white/5'}`}>
-          <Clock className={`w-4 h-4 ${urgent ? 'text-red-400 animate-bounce' : 'text-amber-400'}`} />
-          <span className={`font-black font-mono text-base ${urgent ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</span>
+        <div className={`flex items-center gap-2 px-3 py-1.5 clip-corner-sm border ${urgent ? 'border-neon-magenta/60 bg-neon-magenta/10' : 'border-crimson/30 bg-crimson/5'}`}>
+          <Clock className={`w-4 h-4 ${urgent ? 'text-neon-magenta animate-bounce' : 'text-crimson'}`} />
+          <span className={`font-black font-mono text-base ${urgent ? 'text-neon-magenta' : 'text-white'}`}>{timeLeft}s</span>
           <div className="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-300 ${urgent ? 'bg-red-500' : 'bg-violet-500'}`}
+              className={`h-full rounded-full transition-all duration-300 ${urgent ? 'bg-neon-magenta' : 'bg-crimson'}`}
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Flame className="w-4 h-4 text-amber-400" />
+          <Flame className="w-4 h-4 text-neon-gold" />
           <span className="text-sm font-bold text-white">{myPlayer?.score || 0} pts</span>
         </div>
       </div>
 
       {/* Question Card */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#111118] border border-white/10 mb-4 shadow-xl">
+      <Panel glow={urgent ? 'magenta' : 'crimson'} className="p-5 sm:p-6 mb-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-violet-600/20 text-violet-300 border border-violet-500/30">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-neon-violet/15 text-neon-violet border border-neon-violet/30">
             {q.animeSource}
           </span>
           <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
@@ -257,7 +256,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
           </span>
         </div>
 
-        <h2 className="text-lg sm:text-xl font-black text-white leading-snug mb-6">{q.question}</h2>
+        <h2 className="text-lg sm:text-xl font-display font-black text-white leading-snug mb-6">{q.question}</h2>
 
         {/* Options */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -265,13 +264,13 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
             const isCorrect = idx === q.correctAnswerIndex;
             const isSelected = selectedOption === idx;
 
-            let cls = 'border-white/10 bg-white/[0.03] text-slate-300 hover:border-violet-500/50 hover:text-white';
+            let cls = 'border-white/10 bg-white/[0.03] text-slate-300 hover:border-crimson/60 hover:text-white';
 
             if (answered) {
               if (isCorrect) {
-                cls = 'border-emerald-500/80 bg-emerald-950/60 text-emerald-200 font-bold scale-[1.01]';
+                cls = 'border-emerald-500/80 bg-emerald-950/60 text-emerald-200 font-bold scale-[1.01] shadow-[0_0_20px_rgba(16,185,129,0.25)]';
               } else if (isSelected) {
-                cls = 'border-red-500/80 bg-red-950/60 text-red-300';
+                cls = 'border-neon-magenta/80 bg-neon-magenta/10 text-neon-magenta shadow-[0_0_20px_rgba(255,46,136,0.2)]';
               } else {
                 cls = 'border-white/5 opacity-40 text-slate-500';
               }
@@ -292,7 +291,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
                   <span>{opt}</span>
                 </div>
                 {answered && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
-                {answered && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-400 shrink-0" />}
+                {answered && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-neon-magenta shrink-0" />}
               </button>
             );
           })}
@@ -302,12 +301,12 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
         {answered && (
           <div className="mt-4 p-4 rounded-xl bg-white/[0.03] border border-white/10 animate-fade-in">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-neon-gold flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 shrink-0" />
                 Explication Otaku
               </span>
               {nextCountdown !== null && (
-                <span className="text-xs font-bold text-violet-400 flex items-center gap-1">
+                <span className="text-xs font-bold text-crimson flex items-center gap-1">
                   Suivant dans {nextCountdown}s <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               )}
@@ -315,11 +314,11 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
             <p className="text-xs text-slate-300 leading-relaxed">{q.explanation}</p>
           </div>
         )}
-      </div>
+      </Panel>
 
       {/* Live scoreboard preview */}
-      <div className="p-3 rounded-xl bg-[#111118] border border-white/8">
-        <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+      <Panel glow="neutral" className="p-3">
+        <div className="flex items-center justify-between text-[11px] font-hud font-bold text-slate-500 uppercase tracking-wider mb-2">
           <span>Classement en direct</span>
           <span>{players.length} Joueurs</span>
         </div>
@@ -331,7 +330,7 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
               <div
                 key={p.uid}
                 className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 shrink-0 ${
-                  isMe ? 'border-violet-500/50 bg-violet-950/30' : 'border-white/5 bg-white/[0.02]'
+                  isMe ? 'border-crimson/50 bg-crimson/5' : 'border-white/5 bg-white/[0.02]'
                 }`}
               >
                 <div
@@ -339,17 +338,17 @@ export const QuizGame: React.FC<QuizGameProps> = ({ roomId, user, onGameOver }) 
                   style={{ backgroundColor: av.accentColor }}
                 >
                   <div
-                    className="w-full h-full rounded-full bg-[#0a0a0f]"
+                    className="w-full h-full rounded-full bg-void"
                     dangerouslySetInnerHTML={{ __html: av.avatarSvg }}
                   />
                 </div>
                 <span className="text-xs font-semibold text-white">{p.username}</span>
-                <span className="text-xs font-black text-amber-400">{p.score}</span>
+                <span className="text-xs font-black text-neon-gold">{p.score}</span>
               </div>
             );
           })}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 };

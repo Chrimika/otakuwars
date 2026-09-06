@@ -1,78 +1,72 @@
 'use client';
 
 import React from 'react';
-import { UserProfile } from '../lib/types';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { getAvatarById } from '../data/avatars';
-import { Flame, Plus, LogIn, KeyRound, Trophy } from 'lucide-react';
+import { useAppContext } from '../lib/AppContext';
+import { NeonButton } from './ui/NeonButton';
+import { KatanaIcon } from './ui/icons/OtakuIcons';
+import { LogIn, Trophy } from 'lucide-react';
 
-interface NavbarProps {
-  user: UserProfile | null;
-  onOpenAuth: () => void;
-  onOpenProfile: () => void;
-  onOpenCreateRoom: () => void;
-  onOpenJoinRoom: () => void;
-  onOpenLeaderboard: () => void;
-  onOpenFirebaseConfig?: () => void;
-}
+const NAV_LINKS = [
+  { href: '/evenements', label: 'Événements' },
+  { href: '/bibliotheque', label: 'Bibliothèque' },
+  { href: '/boutique', label: 'Boutique' },
+  { href: '/recompenses', label: 'Récompenses' },
+  { href: '/a-propos', label: 'À propos' },
+];
 
-export const Navbar: React.FC<NavbarProps> = ({
-  user,
-  onOpenAuth,
-  onOpenProfile,
-  onOpenCreateRoom,
-  onOpenJoinRoom,
-  onOpenLeaderboard,
-}) => {
+export const Navbar: React.FC = () => {
+  const { user, openGlobalLeaderboard } = useAppContext();
+  const pathname = usePathname();
+  const router = useRouter();
+
   const avatar = user ? getAvatarById(user.avatarId) : null;
   const isLoggedIn = user && !user.isGuest;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3">
+    <header className="sticky top-0 z-40 bg-void/90 backdrop-blur-xl border-b border-crimson/15 px-4 py-3">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
 
         {/* Logo */}
-        <button
-          onClick={() => window.location.reload()}
-          className="flex items-center gap-2.5 cursor-pointer"
-        >
-          <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/30">
-            <Flame className="w-4 h-4 text-white" />
+        <Link href="/" className="group flex items-center gap-2.5 cursor-pointer">
+          <div className="clip-corner-sm w-9 h-9 bg-crimson flex items-center justify-center shadow-[0_0_20px_rgba(255,31,61,0.45)] group-hover:rotate-6 transition-transform">
+            <KatanaIcon className="w-5 h-5 text-white" />
           </div>
-          <span className="font-black text-base tracking-wide text-white hidden sm:block">
+          <span className="font-display text-lg tracking-wide text-ink hidden sm:block">
             OTAKU WARS
           </span>
-        </button>
+        </Link>
+
+        {/* Nav links (desktop) */}
+        <nav className="hidden lg:flex items-center gap-5">
+          {NAV_LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`font-hud text-xs font-bold uppercase tracking-wide transition-colors ${
+                pathname === l.href ? 'text-crimson' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
 
         {/* Center actions (desktop) */}
         <div className="hidden md:flex items-center gap-2">
-          <button
-            onClick={onOpenCreateRoom}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Créer un salon
-          </button>
-          <button
-            onClick={onOpenJoinRoom}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium text-xs transition-all cursor-pointer"
-          >
-            <KeyRound className="w-3.5 h-3.5 text-violet-400" />
-            Rejoindre
-          </button>
-          <button
-            onClick={onOpenLeaderboard}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-medium text-xs transition-all cursor-pointer"
-          >
-            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+          <NeonButton variant="secondary" size="sm" className="border-neon-gold/50! text-neon-gold! hover:bg-neon-gold/10! hover:border-neon-gold!" onClick={openGlobalLeaderboard}>
+            <Trophy className="w-3.5 h-3.5" />
             Classement
-          </button>
+          </NeonButton>
         </div>
 
         {/* Right: user or login */}
         <div className="flex items-center gap-2">
           <button
-            onClick={onOpenLeaderboard}
-            className="md:hidden flex items-center justify-center p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 transition-all cursor-pointer"
+            onClick={openGlobalLeaderboard}
+            className="md:hidden clip-corner-sm flex items-center justify-center p-2 bg-neon-gold/10 border border-neon-gold/40 text-neon-gold transition-all cursor-pointer"
             title="Classement général"
           >
             <Trophy className="w-4 h-4" />
@@ -80,53 +74,54 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {isLoggedIn ? (
             <button
-              onClick={onOpenProfile}
-              className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-white/5 hover:bg-white/8 border border-white/10 transition-all cursor-pointer"
+              onClick={() => router.push('/compte')}
+              className="flex items-center gap-2 p-1 pr-3 rounded-full bg-white/5 hover:bg-white/8 border border-crimson/30 transition-all cursor-pointer"
             >
-              <div
-                className="w-7 h-7 rounded-full p-0.5 overflow-hidden"
-                style={{ backgroundColor: avatar?.accentColor || '#7c3aed' }}
-              >
-                <div
-                  className="w-full h-full rounded-full bg-[#0a0a0f] flex items-center justify-center"
-                  dangerouslySetInnerHTML={{ __html: avatar?.avatarSvg || '' }}
+              {user!.customAvatarDataUrl ? (
+                <img
+                  src={user!.customAvatarDataUrl}
+                  alt={user!.username}
+                  className="w-7 h-7 rounded-full object-cover ring-1 ring-crimson/40"
                 />
-              </div>
-              <span className="text-xs font-semibold text-white hidden sm:block max-w-[100px] truncate">
+              ) : (
+                <div
+                  className="w-7 h-7 rounded-full p-0.5 overflow-hidden ring-1 ring-crimson/40"
+                  style={{ backgroundColor: avatar?.accentColor || '#8b5cf6' }}
+                >
+                  <div
+                    className="w-full h-full rounded-full bg-void flex items-center justify-center"
+                    dangerouslySetInnerHTML={{ __html: avatar?.avatarSvg || '' }}
+                  />
+                </div>
+              )}
+              <span className="text-xs font-hud font-bold uppercase tracking-wide text-white hidden sm:block max-w-25 truncate">
                 {user!.username}
               </span>
             </button>
           ) : (
-            <button
-              onClick={onOpenAuth}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer"
-            >
+            <NeonButton variant="primary" size="sm" onClick={() => router.push('/auth')}>
               <LogIn className="w-3.5 h-3.5" />
               <span className="hidden sm:block">Se connecter</span>
               <span className="sm:hidden">Login</span>
-            </button>
+            </NeonButton>
           )}
         </div>
       </div>
 
-      {/* Mobile action bar */}
-      <div className="md:hidden flex items-center gap-2 mt-2 pt-2 border-t border-white/5">
-        <button
-          onClick={onOpenCreateRoom}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Créer un salon
-        </button>
-        <button
-          onClick={onOpenJoinRoom}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-medium text-xs transition-all cursor-pointer"
-        >
-          <KeyRound className="w-3.5 h-3.5 text-violet-400" />
-          Rejoindre
-        </button>
+      {/* Mobile links */}
+      <div className="lg:hidden flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2 pt-2 border-t border-crimson/10">
+        {NAV_LINKS.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className={`font-hud text-[11px] font-bold uppercase tracking-wide ${
+              pathname === l.href ? 'text-crimson' : 'text-slate-400'
+            }`}
+          >
+            {l.label}
+          </Link>
+        ))}
       </div>
     </header>
   );
 };
-

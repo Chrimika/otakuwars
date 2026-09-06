@@ -4,6 +4,13 @@ import React, { useState } from 'react';
 import { UserProfile, GameRoom } from '../lib/types';
 import { createGameRoom } from '../lib/gameService';
 import { X, Clock, Swords, Layers, AlertCircle } from 'lucide-react';
+import { NeonButton } from './ui/NeonButton';
+import { Panel } from './ui/Panel';
+import {
+  ImpactBurstIcon, LightningIcon, DropIcon, ToriiIcon, SpeechBubbleIcon,
+  KatanaIcon, RobotIcon, MoonStarIcon, CupIcon, BallIcon, MagnifierIcon,
+  HeartIcon, ScrollIcon,
+} from './ui/icons/OtakuIcons';
 
 interface CreateRoomModalProps {
   isOpen: boolean;
@@ -11,6 +18,9 @@ interface CreateRoomModalProps {
   onClose: () => void;
   onRoomCreated: (room: GameRoom) => void;
 }
+
+const inputClass =
+  'w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-crimson focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)] transition-all';
 
 export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, onClose, onRoomCreated }) => {
   const [roomName, setRoomName] = useState(`Salon de ${user.username}`);
@@ -23,19 +33,19 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
   if (!isOpen) return null;
 
   const categories = [
-    { id: 'all', label: 'Tous les animes', icon: '🌟' },
-    { id: 'shonen', label: 'Shonen', icon: '⚡' },
-    { id: 'seinen', label: 'Seinen & Dark', icon: '🩸' },
-    { id: 'isekai', label: 'Isekai', icon: '🗡️' },
-    { id: 'quotes', label: 'Citations', icon: '💬' },
-    { id: 'hardcore', label: 'Hardcore', icon: '🔥' },
-    { id: 'mecha', label: 'Mecha', icon: '🤖' },
-    { id: 'magical_girl', label: 'Magical Girl', icon: '🌙' },
-    { id: 'slice_of_life', label: 'Tranche de vie', icon: '🎸' },
-    { id: 'sports', label: 'Sports', icon: '⚽' },
-    { id: 'thriller', label: 'Thriller / Mystère', icon: '🕵️' },
-    { id: 'romance', label: 'Romance', icon: '❤️' },
-    { id: 'historical', label: 'Historique', icon: '🌸' },
+    { id: 'all', label: 'Tous les animes', icon: ImpactBurstIcon },
+    { id: 'shonen', label: 'Shonen', icon: LightningIcon },
+    { id: 'seinen', label: 'Seinen & Dark', icon: DropIcon },
+    { id: 'isekai', label: 'Isekai', icon: ToriiIcon },
+    { id: 'quotes', label: 'Citations', icon: SpeechBubbleIcon },
+    { id: 'hardcore', label: 'Hardcore', icon: KatanaIcon },
+    { id: 'mecha', label: 'Mecha', icon: RobotIcon },
+    { id: 'magical_girl', label: 'Magical Girl', icon: MoonStarIcon },
+    { id: 'slice_of_life', label: 'Tranche de vie', icon: CupIcon },
+    { id: 'sports', label: 'Sports', icon: BallIcon },
+    { id: 'thriller', label: 'Thriller / Mystère', icon: MagnifierIcon },
+    { id: 'romance', label: 'Romance', icon: HeartIcon },
+    { id: 'historical', label: 'Historique', icon: ScrollIcon },
   ];
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -60,27 +70,27 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md bg-[#111118] border border-white/10 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-void/85 backdrop-blur-sm animate-fade-in">
+      <Panel glow="crimson" className="w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
+          className="absolute top-4 right-4 clip-corner-sm w-8 h-8 flex items-center justify-center bg-white/5 border border-crimson/20 hover:border-crimson/60 text-slate-400 hover:text-crimson transition-all cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
-            <Swords className="w-5 h-5 text-violet-400" />
+          <div className="clip-corner-sm w-10 h-10 bg-crimson/10 border border-crimson/40 flex items-center justify-center">
+            <Swords className="w-5 h-5 text-crimson" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white">Créer un salon</h2>
+            <h2 className="text-lg font-display font-black text-white">Créer un salon</h2>
             <p className="text-xs text-slate-500">Configurez votre arène de quiz</p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 text-xs flex items-start gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-neon-magenta/10 border border-neon-magenta/40 text-neon-magenta text-xs flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errorMsg}</span>
           </div>
@@ -94,7 +104,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
               type="text"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-violet-500 focus:outline-none transition-colors"
+              className={inputClass}
               required
             />
           </div>
@@ -110,11 +120,11 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
                   onClick={() => setCategory(c.id)}
                   className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
                     category === c.id
-                      ? 'border-violet-500 bg-violet-950/60 text-white'
+                      ? 'border-crimson bg-crimson/10 text-white'
                       : 'border-white/8 bg-white/[0.02] text-slate-400 hover:text-white hover:border-white/15'
                   }`}
                 >
-                  <span>{c.icon}</span>
+                  <c.icon className="w-4 h-4 shrink-0" />
                   <span className="truncate">{c.label}</span>
                 </button>
               ))}
@@ -125,10 +135,10 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <Clock className="w-3.5 h-3.5 text-neon-gold" />
                 Temps par question
               </label>
-              <span className="text-xs font-bold text-amber-400">{timer}s</span>
+              <span className="text-xs font-bold text-neon-gold">{timer}s</span>
             </div>
             <div className="grid grid-cols-5 gap-1.5">
               {[5, 10, 15, 20, 30].map((t) => (
@@ -138,7 +148,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
                   onClick={() => setTimer(t)}
                   className={`py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                     timer === t
-                      ? 'border-amber-500/60 bg-amber-950/60 text-amber-300'
+                      ? 'border-neon-gold/60 bg-neon-gold/10 text-neon-gold'
                       : 'border-white/8 text-slate-500 hover:text-white'
                   }`}
                 >
@@ -152,10 +162,10 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-violet-400" />
+                <Layers className="w-3.5 h-3.5 text-neon-violet" />
                 Questions
               </label>
-              <span className="text-xs font-bold text-violet-400">{nbQ}</span>
+              <span className="text-xs font-bold text-neon-violet">{nbQ}</span>
             </div>
             <div className="grid grid-cols-4 gap-1.5">
               {[5, 10, 15, 20].map((n) => (
@@ -165,7 +175,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
                   onClick={() => setNbQ(n)}
                   className={`py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                     nbQ === n
-                      ? 'border-violet-500/60 bg-violet-950/60 text-violet-300'
+                      ? 'border-neon-violet/60 bg-neon-violet/10 text-neon-violet'
                       : 'border-white/8 text-slate-500 hover:text-white'
                   }`}
                 >
@@ -175,15 +185,11 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ isOpen, user, 
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all cursor-pointer disabled:opacity-50"
-          >
+          <NeonButton type="submit" variant="primary" disabled={loading} className="w-full">
             {loading ? 'Création...' : 'Lancer le salon'}
-          </button>
+          </NeonButton>
         </form>
-      </div>
+      </Panel>
     </div>
   );
 };

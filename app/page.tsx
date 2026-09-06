@@ -1,86 +1,49 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { UserProfile, GameRoom } from '../lib/types';
-import { OTAKU_AVATARS, getAvatarById } from '../data/avatars';
-import { Navbar } from '../components/Navbar';
-import { AuthModal } from '../components/AuthModal';
-import { ProfileModal } from '../components/ProfileModal';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { GameRoom } from '../lib/types';
+import { OTAKU_AVATARS } from '../data/avatars';
+import { useAppContext, requireAuth } from '../lib/AppContext';
 import { CreateRoomModal } from '../components/CreateRoomModal';
 import { JoinRoomModal } from '../components/JoinRoomModal';
 import { RoomLobby } from '../components/RoomLobby';
 import { QuizGame } from '../components/QuizGame';
 import { Leaderboard } from '../components/Leaderboard';
-import { GlobalLeaderboardModal } from '../components/GlobalLeaderboardModal';
-import { joinGameRoom, subscribeToPublicRooms, recordMatchResults } from '../lib/gameService';
-import { initFirebase } from '../lib/firebase';
-import { Swords, Users, Clock, Trophy, Sparkles, KeyRound, Radio, ArrowRight, Zap } from 'lucide-react';
-
-// ─── Auth gate helper ─────────────────────────────────────────────────────────
-function requireAuth(user: UserProfile | null, cb: () => void, openAuth: () => void) {
-  if (!user || user.isGuest) {
-    openAuth();
-  } else {
-    cb();
-  }
-}
+import { joinGameRoom, subscribeToPublicRooms, recordMatchResults, submitPartnerRequest } from '../lib/gameService';
+import { NeonButton } from '../components/ui/NeonButton';
+import { Panel } from '../components/ui/Panel';
+import { CipherText } from '../components/CipherText';
+import { GamingGlyphsWatermark } from '../components/ui/GamingGlyphsWatermark';
+import { KatanaIcon, ImpactBurstIcon, ToriiIcon, ScrollIcon, OniMaskIcon } from '../components/ui/icons/OtakuIcons';
+import { Users, Clock, Trophy, KeyRound, ArrowRight, Zap, UserPlus, Send, Check, Handshake } from 'lucide-react';
 
 function HomeContent() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const { user, setUser } = useAppContext();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [activeRoom, setActiveRoom] = useState<GameRoom | null>(null);
   const [publicRooms, setPublicRooms] = useState<GameRoom[]>([]);
   const [viewState, setViewState] = useState<'home' | 'lobby' | 'game' | 'leaderboard'>('home');
 
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false);
-  const [isGlobalLeaderboardOpen, setIsGlobalLeaderboardOpen] = useState(false);
 
-  // ── Initialise user (guest par défaut, jamais null) ───────────────────────
-  // ── Initialise Firebase en premier (côté client uniquement) ───────────────
+  const goToAuth = () => router.push('/auth');
+
+  // ── Deep link : ?code= (rejoindre direct depuis un lien partagé) ──────────
   useEffect(() => {
-    initFirebase();
-  }, []);
+    if (!user) return;
 
-  // ── Initialise user (guest par défaut) ───────────────────────────────────
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const stored = localStorage.getItem('otakuwars_user');
-    let currentUser: UserProfile | null = null;
-
-    if (stored) {
-      try { currentUser = JSON.parse(stored); } catch { /* ignore */ }
-    }
-
-    if (!currentUser) {
-      const av = OTAKU_AVATARS[0];
-      currentUser = {
-        uid: `guest_${Date.now()}`,
-        username: `Otaku_${Math.floor(Math.random() * 9000 + 1000)}`,
-        otakuTitle: av.title,
-        avatarId: av.id,
-        favoriteAnime: 'One Piece',
-        gamesPlayed: 0,
-        wins: 0,
-        totalScore: 0,
-        isGuest: true,
-        createdAt: Date.now(),
-      };
-      localStorage.setItem('otakuwars_user', JSON.stringify(currentUser));
-    }
-
-    setUser(currentUser);
-
-    // Deep link via ?code=
-    const code = new URLSearchParams(window.location.search).get('code');
-    if (code && currentUser && !currentUser.isGuest) {
-      joinGameRoom(code, currentUser).then((room) => {
+    const code = searchParams.get('code');
+    if (code && !user.isGuest) {
+      joinGameRoom(code, user).then((room) => {
         if (room) { setActiveRoom(room); setViewState('lobby'); }
       });
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // ── Subscribe to public rooms ─────────────────────────────────────────────
   useEffect(() => {
@@ -89,8 +52,6 @@ function HomeContent() {
   }, []);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const openAuth = () => setIsAuthOpen(true);
-
   const handleRoomCreated = (room: GameRoom) => { setActiveRoom(room); setViewState('lobby'); };
   const handleRoomJoined  = (room: GameRoom) => { setActiveRoom(room); setViewState('lobby'); };
   const handleLeaveRoom   = () => { setActiveRoom(null); setViewState('home'); };
@@ -104,44 +65,35 @@ function HomeContent() {
   };
 
   const handleDirectJoin = async (r: GameRoom) => {
-    if (!user || user.isGuest) { openAuth(); return; }
+    if (!user || user.isGuest) { goToAuth(); return; }
     const joined = await joinGameRoom(r.id, user);
     if (joined) { setActiveRoom(joined); setViewState('lobby'); }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-slate-100 flex flex-col relative overflow-x-hidden">
-      {/* Ambient glow */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/3 w-96 h-96 bg-violet-700/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-indigo-700/15 rounded-full blur-[120px]" />
-      </div>
+    <>
+      {/* ── HOME ─────────────────────────────────────────────────────────── */}
+      {viewState === 'home' && (
+        <div>
 
-      <Navbar
-        user={user}
-        onOpenAuth={openAuth}
-        onOpenProfile={() => setIsProfileOpen(true)}
-        onOpenCreateRoom={() => requireAuth(user, () => setIsCreateRoomOpen(true), openAuth)}
-        onOpenJoinRoom={() => requireAuth(user, () => setIsJoinRoomOpen(true), openAuth)}
-        onOpenLeaderboard={() => setIsGlobalLeaderboardOpen(true)}
-      />
+          {/* Hero */}
+          <div className="relative overflow-hidden">
+            <div className="manga-halftone" />
+            <div className="speed-lines" />
+            <GamingGlyphsWatermark />
+            <span className="font-jp absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[32vw] sm:text-[22vw] font-bold text-crimson/[0.06] select-none pointer-events-none whitespace-nowrap">
+              対戦
+            </span>
 
-      <main className="flex-1 z-10">
-
-        {/* ── HOME ─────────────────────────────────────────────────────────── */}
-        {viewState === 'home' && (
-          <div className="max-w-6xl mx-auto px-4 py-12 sm:py-20">
-
-            {/* Hero */}
-            <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-950/60 border border-violet-700/40 text-violet-300 text-xs font-semibold mb-6">
-                <Radio className="w-3.5 h-3.5 text-violet-400" />
+            <div className="relative max-w-3xl mx-auto px-4 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 -rotate-2 clip-corner-sm bg-neon-magenta/10 border border-neon-magenta/40 text-neon-magenta text-xs font-hud font-bold uppercase tracking-wider mb-6">
+                <ImpactBurstIcon className="w-3.5 h-3.5" />
                 Quiz multijoueur en temps réel
               </div>
 
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-[1.1] mb-5">
-                L&apos;arène ultime du{' '}
-                <span className="text-violet-400">quiz otaku</span>
+              <h1 className="text-5xl sm:text-7xl font-display tracking-wide text-ink leading-[1.05] mb-5">
+                L&apos;arène ultime du<br />
+                <CipherText text="QUIZ OTAKU" className="text-crimson text-glow-crimson" />
               </h1>
 
               <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed mb-8">
@@ -149,66 +101,69 @@ function HomeContent() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
-                  onClick={() => requireAuth(user, () => setIsCreateRoomOpen(true), openAuth)}
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all"
+                <NeonButton
+                  variant="primary"
+                  onClick={() => requireAuth(user, () => setIsCreateRoomOpen(true), goToAuth)}
                 >
-                  <Swords className="w-4 h-4" />
+                  <KatanaIcon className="w-4 h-4" />
                   Créer un salon
-                </button>
-                <button
-                  onClick={() => requireAuth(user, () => setIsJoinRoomOpen(true), openAuth)}
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm transition-all"
+                </NeonButton>
+                <NeonButton
+                  variant="secondary"
+                  onClick={() => requireAuth(user, () => setIsJoinRoomOpen(true), goToAuth)}
                 >
-                  <KeyRound className="w-4 h-4 text-violet-400" />
+                  <KeyRound className="w-4 h-4" />
                   Rejoindre avec un code
-                </button>
+                </NeonButton>
               </div>
 
               {(user?.isGuest) && (
                 <p className="mt-4 text-xs text-slate-500">
-                  <button onClick={openAuth} className="text-violet-400 underline underline-offset-2 cursor-pointer">
+                  <button onClick={goToAuth} className="text-crimson underline underline-offset-2 cursor-pointer">
                     Connectez-vous
                   </button>
                   {' '}pour créer ou rejoindre un salon.
                 </p>
               )}
             </div>
+          </div>
+          <div className="torn-edge" />
+
+          <div className="max-w-6xl mx-auto px-4 pt-12 pb-12 sm:pb-20">
 
             {/* Live rooms */}
             <section className="mb-20">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <h2 className="text-base font-hud font-bold uppercase tracking-wide text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-neon-magenta animate-pulse glow-magenta" />
                   Salons ouverts
                 </h2>
                 <button
-                  onClick={() => requireAuth(user, () => setIsCreateRoomOpen(true), openAuth)}
-                  className="text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
+                  onClick={() => requireAuth(user, () => setIsCreateRoomOpen(true), goToAuth)}
+                  className="text-xs text-crimson hover:brightness-125 font-hud font-bold uppercase tracking-wide transition-colors cursor-pointer"
                 >
                   + Créer le mien
                 </button>
               </div>
 
               {publicRooms.filter(r => r.state === 'waiting').length === 0 ? (
-                <div className="py-16 text-center rounded-2xl border border-white/5 bg-white/[0.02]">
+                <Panel glow="neutral" className="py-16 text-center">
                   <Zap className="w-10 h-10 text-slate-700 mx-auto mb-3" />
                   <p className="text-slate-500 text-sm font-medium">Aucun salon ouvert</p>
                   <p className="text-slate-600 text-xs mt-1">Soyez le premier à lancer une partie !</p>
-                </div>
+                </Panel>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {publicRooms.filter(r => r.state === 'waiting').map((r) => {
                     const count = Object.keys(r.players || {}).length;
-                    const av = getAvatarById(r.players[r.hostId]?.avatarId || 'goku');
                     return (
-                      <div key={r.id} className="group p-4 rounded-2xl bg-white/[0.03] border border-white/8 hover:border-violet-700/50 transition-all">
+                      <Panel key={r.id} glow="crimson" className="group p-4 hover:border-crimson/60 transition-all">
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="min-w-0">
                             <p className="font-bold text-white text-sm truncate">{r.name}</p>
                             <p className="text-xs text-slate-500 mt-0.5">par {r.hostName}</p>
                           </div>
-                          <span className="shrink-0 font-mono text-xs font-bold text-violet-400 bg-violet-950/60 border border-violet-800/40 px-2 py-1 rounded-lg">
+                          <span className="shrink-0 font-mono text-xs font-bold text-crimson bg-crimson/10 border border-crimson/30 px-2 py-1">
                             {r.code}
                           </span>
                         </div>
@@ -225,13 +180,10 @@ function HomeContent() {
                           </span>
                         </div>
 
-                        <button
-                          onClick={() => handleDirectJoin(r)}
-                          className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-violet-600/20 hover:bg-violet-600/40 border border-violet-600/30 text-violet-300 text-xs font-bold transition-all cursor-pointer"
-                        >
+                        <NeonButton variant="primary" size="sm" className="w-full" onClick={() => handleDirectJoin(r)}>
                           Rejoindre <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                        </NeonButton>
+                      </Panel>
                     );
                   })}
                 </div>
@@ -240,23 +192,23 @@ function HomeContent() {
 
             {/* Avatars */}
             <section className="mb-20">
-              <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+              <h2 className="text-base font-hud font-bold uppercase tracking-wide text-white mb-5 flex items-center gap-2">
+                <ToriiIcon className="w-4 h-4 text-neon-gold" />
                 Avatars & Rangs Otaku
               </h2>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {OTAKU_AVATARS.map((av) => (
                   <button
                     key={av.id}
-                    onClick={() => setIsProfileOpen(true)}
-                    className="group p-3 rounded-2xl bg-white/[0.03] border border-white/8 hover:border-violet-700/40 transition-all flex flex-col items-center text-center gap-2 cursor-pointer"
+                    onClick={() => router.push('/compte')}
+                    className="group clip-corner-sm p-3 bg-void-2/60 border border-white/8 hover:border-crimson/50 transition-all flex flex-col items-center text-center gap-2 cursor-pointer"
                   >
                     <div
-                      className="w-12 h-12 rounded-xl p-0.5 group-hover:scale-105 transition-transform"
+                      className="clip-corner-sm w-12 h-12 p-0.5 group-hover:scale-105 transition-transform"
                       style={{ backgroundColor: av.accentColor }}
                     >
                       <div
-                        className="w-full h-full rounded-[10px] bg-[#0a0a0f] flex items-center justify-center overflow-hidden"
+                        className="clip-corner-sm w-full h-full bg-void flex items-center justify-center overflow-hidden"
                         dangerouslySetInnerHTML={{ __html: av.avatarSvg }}
                       />
                     </div>
@@ -270,77 +222,61 @@ function HomeContent() {
             </section>
 
             {/* Features */}
-            <section>
+            <section className="mb-20">
               <div className="grid sm:grid-cols-3 gap-3">
                 {[
-                  { icon: <Clock className="w-5 h-5 text-amber-400" />, title: 'Compte à rebours', desc: 'Par défaut 10s par question, réglable de 5s à 30s.' },
-                  { icon: <Radio className="w-5 h-5 text-violet-400" />, title: 'Temps réel', desc: "Scores, réponses et transitions synchronisés via Firebase Firestore." },
-                  { icon: <Trophy className="w-5 h-5 text-amber-400" />, title: 'Classement final', desc: 'Podium, confettis et statistiques détaillées en fin de partie.' },
+                  { icon: <Clock className="w-5 h-5 text-neon-gold" />, title: 'Compte à rebours', desc: 'Par défaut 10s par question, réglable de 5s à 30s.', glow: 'gold' as const },
+                  { icon: <ImpactBurstIcon className="w-5 h-5 text-crimson" />, title: 'Temps réel', desc: "Scores, réponses et transitions synchronisés via Firebase Firestore.", glow: 'crimson' as const },
+                  { icon: <Trophy className="w-5 h-5 text-neon-violet" />, title: 'Classement final', desc: 'Podium, confettis et statistiques détaillées en fin de partie.', glow: 'violet' as const },
                 ].map((f) => (
-                  <div key={f.title} className="p-5 rounded-2xl bg-white/[0.03] border border-white/8">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center mb-3">
+                  <Panel key={f.title} glow={f.glow} className="p-5">
+                    <div className="w-9 h-9 clip-corner-sm bg-white/5 flex items-center justify-center mb-3">
                       {f.icon}
                     </div>
                     <h3 className="font-bold text-white text-sm mb-1">{f.title}</h3>
                     <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
-                  </div>
+                  </Panel>
                 ))}
               </div>
             </section>
+
+            {/* Comment ça marche */}
+            <HowItWorksSection />
+
+            {/* Devenir partenaire */}
+            <PartnerSection />
           </div>
-        )}
 
-        {/* ── LOBBY ────────────────────────────────────────────────────────── */}
-        {viewState === 'lobby' && activeRoom && user && (
-          <RoomLobby
-            roomId={activeRoom.id}
-            user={user}
-            onLeaveRoom={handleLeaveRoom}
-            onGameStarted={handleGameStarted}
-          />
-        )}
+          {/* CTA */}
+          <CtaSection user={user} onCreateAccount={goToAuth} />
+        </div>
+      )}
 
-        {/* ── GAME ─────────────────────────────────────────────────────────── */}
-        {viewState === 'game' && activeRoom && user && (
-          <QuizGame roomId={activeRoom.id} user={user} onGameOver={handleGameOver} />
-        )}
+      {/* ── LOBBY ────────────────────────────────────────────────────────── */}
+      {viewState === 'lobby' && activeRoom && user && (
+        <RoomLobby
+          roomId={activeRoom.id}
+          user={user}
+          onLeaveRoom={handleLeaveRoom}
+          onGameStarted={handleGameStarted}
+        />
+      )}
 
-        {/* ── LEADERBOARD ──────────────────────────────────────────────────── */}
-        {viewState === 'leaderboard' && activeRoom && user && (
-          <Leaderboard
-            room={activeRoom}
-            user={user}
-            onRematch={() => handleRoomCreated(activeRoom)}
-            onHome={handleLeaveRoom}
-            onUpdateUser={setUser}
-          />
-        )}
-      </main>
+      {/* ── GAME ─────────────────────────────────────────────────────────── */}
+      {viewState === 'game' && activeRoom && user && (
+        <QuizGame roomId={activeRoom.id} user={user} onGameOver={handleGameOver} />
+      )}
 
-      {/* Modals */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onSuccess={(u) => { setUser(u); setIsAuthOpen(false); }}
-      />
-
-      <ProfileModal
-        user={user}
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-        onUpdate={setUser}
-        onLogout={() => {
-          localStorage.removeItem('otakuwars_user');
-          setUser(null);
-          setIsProfileOpen(false);
-        }}
-      />
-
-      <GlobalLeaderboardModal
-        isOpen={isGlobalLeaderboardOpen}
-        onClose={() => setIsGlobalLeaderboardOpen(false)}
-        currentUser={user}
-      />
+      {/* ── LEADERBOARD ──────────────────────────────────────────────────── */}
+      {viewState === 'leaderboard' && activeRoom && user && (
+        <Leaderboard
+          room={activeRoom}
+          user={user}
+          onRematch={() => handleRoomCreated(activeRoom)}
+          onHome={handleLeaveRoom}
+          onUpdateUser={setUser}
+        />
+      )}
 
       {user && !user.isGuest && (
         <>
@@ -358,17 +294,140 @@ function HomeContent() {
           />
         </>
       )}
+    </>
+  );
+}
 
-      <footer className="border-t border-white/5 py-5 text-center text-xs text-slate-700 z-10">
-        © 2026 OTAKU WARS
-      </footer>
-    </div>
+function HowItWorksSection() {
+  const steps = [
+    { icon: <UserPlus className="w-5 h-5 text-crimson" />, title: 'Créez un compte', desc: 'Profil otaku en quelques étapes, connexion via Google.' },
+    { icon: <KatanaIcon className="w-5 h-5 text-neon-gold" />, title: 'Créez ou rejoignez', desc: 'Lancez un salon ou entrez un code partagé par un ami.' },
+    { icon: <ImpactBurstIcon className="w-5 h-5 text-neon-violet" />, title: 'Répondez en direct', desc: 'Compte à rebours, score de vitesse, tout le monde en simultané.' },
+    { icon: <Trophy className="w-5 h-5 text-crimson" />, title: 'Grimpez au classement', desc: 'Podium de fin de partie et classement général de la communauté.' },
+  ];
+
+  return (
+    <section className="mb-20">
+      <h2 className="text-base font-hud font-bold uppercase tracking-wide text-white mb-5 flex items-center gap-2">
+        <ScrollIcon className="w-4 h-4 text-neon-gold" />
+        Comment ça marche
+      </h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {steps.map((s, i) => (
+          <Panel key={s.title} glow="neutral" className="p-5 relative">
+            <span className="absolute -top-3 -left-1 font-display text-3xl text-crimson/30">{i + 1}</span>
+            <div className="w-9 h-9 clip-corner-sm bg-white/5 flex items-center justify-center mb-3">
+              {s.icon}
+            </div>
+            <h3 className="font-bold text-white text-sm mb-1">{s.title}</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+          </Panel>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PartnerSection() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      await submitPartnerRequest({ name, email, message });
+      setSent(true);
+      setName(''); setEmail(''); setMessage('');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <section id="partenaire" className="mb-4 scroll-mt-24">
+      <Panel glow="gold" className="p-6 sm:p-8 grid md:grid-cols-2 gap-8 items-start">
+        <div>
+          <div className="w-10 h-10 clip-corner-sm bg-neon-gold/10 border border-neon-gold/40 flex items-center justify-center mb-4">
+            <Handshake className="w-5 h-5 text-neon-gold" />
+          </div>
+          <h2 className="font-display text-2xl text-white mb-2">Devenir partenaire</h2>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            Association, boutique otaku, organisateur d&apos;événement ou éditeur de manga ?
+            Associez votre marque à l&apos;arène et touchez toute la communauté Otaku Wars.
+          </p>
+        </div>
+
+        {sent ? (
+          <div className="flex items-center gap-2 p-4 clip-corner-sm bg-emerald-950/60 border border-emerald-800/40 text-emerald-300 text-sm">
+            <Check className="w-4 h-4 shrink-0" /> Merci ! Votre demande a bien été envoyée, nous revenons vers vous rapidement.
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nom / Structure"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-neon-gold focus:outline-none transition-colors"
+            />
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-neon-gold focus:outline-none transition-colors"
+            />
+            <textarea
+              required
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Votre projet de partenariat"
+              rows={3}
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-neon-gold focus:outline-none transition-colors resize-none"
+            />
+            <NeonButton type="submit" variant="primary" disabled={sending} className="w-full bg-neon-gold!">
+              <Send className="w-4 h-4" />
+              {sending ? 'Envoi...' : 'Envoyer la demande'}
+            </NeonButton>
+          </form>
+        )}
+      </Panel>
+    </section>
+  );
+}
+
+function CtaSection({ user, onCreateAccount }: { user: ReturnType<typeof useAppContext>['user']; onCreateAccount: () => void }) {
+  if (user && !user.isGuest) return null;
+
+  return (
+    <section className="relative overflow-hidden py-16 sm:py-20 mt-4">
+      <div className="manga-halftone opacity-60" />
+      <div className="speed-lines opacity-70" />
+      <div className="relative max-w-2xl mx-auto px-4 text-center">
+        <OniMaskIcon className="w-10 h-10 text-crimson mx-auto mb-4" />
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-3">
+          Rejoins la communauté otaku ultime
+        </h2>
+        <p className="text-slate-400 text-sm sm:text-base mb-6 max-w-lg mx-auto">
+          Crée ton compte, choisis ton avatar et affronte les meilleurs otakus du Cameroun et d&apos;ailleurs.
+        </p>
+        <NeonButton variant="primary" onClick={onCreateAccount}>
+          <UserPlus className="w-4 h-4" />
+          Créer mon compte
+        </NeonButton>
+      </div>
+    </section>
   );
 }
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-void" />}>
       <HomeContent />
     </Suspense>
   );

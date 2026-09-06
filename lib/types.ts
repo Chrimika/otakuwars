@@ -21,6 +21,14 @@ export interface UserProfile {
   totalScore: number;
   isGuest: boolean;
   createdAt: number;
+  // ── Profil onboarding (optionnel, rempli via /auth) ────────────────────────
+  country?: string;
+  gender?: 'homme' | 'femme';
+  city?: string;
+  phone?: string;
+  topManga?: string[];
+  otakuScore?: number;
+  customAvatarDataUrl?: string;
 }
 
 export interface QuizQuestion {

@@ -6,6 +6,8 @@ import { subscribeToRoom, togglePlayerReady, startGameMatch } from '../lib/gameS
 import { getAvatarById } from '../data/avatars';
 import { Copy, Check, Users, Play, Clock, ArrowLeft, Crown } from 'lucide-react';
 import { soundFx } from '../lib/soundEffects';
+import { NeonButton } from './ui/NeonButton';
+import { Panel } from './ui/Panel';
 
 interface RoomLobbyProps {
   roomId: string;
@@ -31,7 +33,7 @@ export const RoomLobby: React.FC<RoomLobbyProps> = ({ roomId, user, onLeaveRoom,
   if (!room) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mb-3" />
+        <div className="w-10 h-10 border-2 border-crimson border-t-transparent rounded-full animate-spin mb-3" />
         <p className="text-sm text-slate-400">Chargement du salon...</p>
       </div>
     );
@@ -58,34 +60,34 @@ export const RoomLobby: React.FC<RoomLobbyProps> = ({ roomId, user, onLeaveRoom,
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
-      <button onClick={onLeaveRoom} className="flex items-center gap-1.5 mb-6 text-xs text-slate-500 hover:text-white transition-colors cursor-pointer">
+      <button onClick={onLeaveRoom} className="flex items-center gap-1.5 mb-6 text-xs text-slate-500 hover:text-crimson transition-colors cursor-pointer">
         <ArrowLeft className="w-4 h-4" /> Quitter le salon
       </button>
 
       {/* Header */}
-      <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/8 mb-5">
+      <Panel glow="crimson" className="p-5 mb-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-black text-white">{room.name}</h1>
+            <h1 className="text-xl font-display font-black text-white">{room.name}</h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Créé par <span className="text-violet-400">{room.hostName}</span>
+              Créé par <span className="text-crimson">{room.hostName}</span>
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
               <span className="flex items-center gap-1 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1 rounded-lg">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />{room.timerPerQuestion}s/question
+                <Clock className="w-3.5 h-3.5 text-neon-gold" />{room.timerPerQuestion}s/question
               </span>
               <span className="flex items-center gap-1 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1 rounded-lg">
                 {room.totalQuestions} questions
               </span>
               <span className="flex items-center gap-1 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1 rounded-lg">
-                <Users className="w-3.5 h-3.5 text-violet-400" />{players.length} joueur{players.length > 1 ? 's' : ''}
+                <Users className="w-3.5 h-3.5 text-neon-violet" />{players.length} joueur{players.length > 1 ? 's' : ''}
               </span>
             </div>
           </div>
 
           {/* Code */}
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-black/40 border border-white/8 self-start sm:self-auto">
-            <span className="font-mono font-black text-xl tracking-widest text-violet-300">{room.code}</span>
+          <div className="flex items-center gap-2 p-3 clip-corner-sm bg-black/40 border border-crimson/30 self-start sm:self-auto">
+            <span className="font-mono font-black text-xl tracking-widest text-crimson text-glow-crimson">{room.code}</span>
             <button
               onClick={handleCopy}
               className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
@@ -94,11 +96,11 @@ export const RoomLobby: React.FC<RoomLobbyProps> = ({ roomId, user, onLeaveRoom,
             </button>
           </div>
         </div>
-      </div>
+      </Panel>
 
       {/* Players */}
       <div className="mb-5">
-        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Joueurs connectés</h2>
+        <h2 className="text-xs font-hud font-bold text-slate-500 uppercase tracking-wider mb-3">Joueurs connectés</h2>
         <div className="space-y-2">
           {players.map((p) => {
             const av = getAvatarById(p.avatarId);
@@ -106,22 +108,22 @@ export const RoomLobby: React.FC<RoomLobbyProps> = ({ roomId, user, onLeaveRoom,
             return (
               <div
                 key={p.uid}
-                className={`flex items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
-                  isMe ? 'bg-violet-950/30 border-violet-700/40' : 'bg-white/[0.02] border-white/8'
+                className={`flex items-center justify-between gap-3 p-3 clip-corner-sm border transition-all ${
+                  isMe ? 'bg-crimson/5 border-crimson/40' : 'bg-white/[0.02] border-white/8'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl p-0.5 shrink-0" style={{ backgroundColor: av.accentColor }}>
+                  <div className="clip-corner-sm w-9 h-9 p-0.5 shrink-0" style={{ backgroundColor: av.accentColor }}>
                     <div
-                      className="w-full h-full rounded-[9px] bg-[#0a0a0f] flex items-center justify-center overflow-hidden"
+                      className="clip-corner-sm w-full h-full bg-void flex items-center justify-center overflow-hidden"
                       dangerouslySetInnerHTML={{ __html: av.avatarSvg }}
                     />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-white">{p.username}</span>
-                      {isMe && <span className="text-[10px] text-violet-400">(vous)</span>}
-                      {p.isHost && <Crown className="w-3.5 h-3.5 text-amber-400" />}
+                      {isMe && <span className="text-[10px] text-crimson">(vous)</span>}
+                      {p.isHost && <Crown className="w-3.5 h-3.5 text-neon-gold" />}
                     </div>
                     <span className="text-xs text-slate-500">{p.otakuTitle}</span>
                   </div>
@@ -129,7 +131,7 @@ export const RoomLobby: React.FC<RoomLobbyProps> = ({ roomId, user, onLeaveRoom,
 
                 <div>
                   {p.isHost ? (
-                    <span className="text-xs text-amber-400 font-semibold">Hôte</span>
+                    <span className="text-xs text-neon-gold font-semibold">Hôte</span>
                   ) : p.isReady ? (
                     <span className="flex items-center gap-1 text-xs text-emerald-400 font-semibold">
                       <Check className="w-3.5 h-3.5" /> Prêt
@@ -147,25 +149,19 @@ export const RoomLobby: React.FC<RoomLobbyProps> = ({ roomId, user, onLeaveRoom,
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
         {!isHost && (
-          <button
+          <NeonButton
+            variant={myPlayer?.isReady ? 'ghost' : 'secondary'}
+            className={`flex-1 ${myPlayer?.isReady ? 'bg-emerald-600! border-emerald-600! text-white!' : ''}`}
             onClick={handleToggleReady}
-            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
-              myPlayer?.isReady
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                : 'bg-white/5 hover:bg-white/10 border border-white/10 text-white'
-            }`}
           >
             {myPlayer?.isReady ? 'Annuler la préparation' : 'Je suis prêt !'}
-          </button>
+          </NeonButton>
         )}
         {isHost && (
-          <button
-            onClick={handleStart}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-all cursor-pointer"
-          >
-            <Play className="w-4 h-4 fill-white" />
+          <NeonButton variant="primary" className="flex-1" onClick={handleStart}>
+            <Play className="w-4 h-4 fill-black" />
             Lancer la partie
-          </button>
+          </NeonButton>
         )}
       </div>
     </div>
