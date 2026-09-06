@@ -11623,7 +11623,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_quote_55',
-    question: 'Dans Fullmetal Alchemist, qui dit : "L'homme ne peut rien obtenir sans donner quelque chose en retour" ?',
+    question: 'Dans Fullmetal Alchemist, qui dit : "L\'homme ne peut rien obtenir sans donner quelque chose en retour" ?',
     options: ['Edward Elric', 'Alphonse Elric', 'Roy Mustang', 'Van Hohenheim'],
     correctAnswerIndex: 0,
     explanation: 'Cette phrase résume la loi de l\'échange équivalent, principe central de Fullmetal Alchemist.',
