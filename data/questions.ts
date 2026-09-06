@@ -2285,7 +2285,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_208',
-    question: 'Dans Hunter x Hunter, quel est le nom de l\'attaque de Killua "Godspeed" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom de l\'attaque de Killua Ultra rapide ?',
     options: ['Godspeed', 'Jajanken', 'Bungee Gum', 'Nen Infini'],
     correctAnswerIndex: 0,
     explanation: 'Godspeed est la technique de Killua utilisant l\'électricité pour augmenter sa vitesse et ses réflexes.',
@@ -2296,7 +2296,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_209',
-    question: 'Dans Fairy Tail, quel est le nom de la magie de Natsu "Fire Dragon Slayer" ?',
+    question: 'Dans Fairy Tail, quel est le nom de la magie supreme de Natsu ?',
     options: ['Fire Dragon Slayer', 'Dragon Slayer', 'Fire Magic', 'Dragon Force'],
     correctAnswerIndex: 0,
     explanation: 'Natsu utilise la Fire Dragon Slayer Magic, héritée de son père adoptif Igneel.',
@@ -2307,9 +2307,9 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_210',
-    question: 'Dans Black Clover, quel est le nom de l\'épée d\'Asta "Anti-Magic Sword" ?',
-    options: ['Anti-Magic Sword', 'Demon Sword', 'Magic Sword', 'Dark Sword'],
-    correctAnswerIndex: 0,
+    question: 'Dans Black Clover, quel est le nom de l\'épée d\'Asta la 1ere ?',
+    options: ['pas de reponses', 'Drenda', 'Annihilda', 'Dispelda'],
+    correctAnswerIndex: 1,
     explanation: 'L\'Anti-Magic Sword est l\'épée d\'Asta qui annule toute magie qu\'elle touche.',
     animeSource: 'Black Clover',
     category: 'shonen',
@@ -2329,8 +2329,8 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_212',
-    question: 'Dans One Punch Man, quel est le nom de l\'attaque de Genos "Incinerate" ?',
-    options: ['Incinerate', 'Meteor Punch', 'Serious Punch', 'Normal Punch'],
+    question: 'Dans One Punch Man, quel est le nom de l\'attaque de Genos ?',
+    options: ['Incineration', 'Meteor Punch', 'Serious Punch', 'Normal Punch'],
     correctAnswerIndex: 0,
     explanation: 'Incinerate est l\'attaque de Genos qui projette un rayon de chaleur intense.',
     animeSource: 'One Punch Man',
@@ -2340,7 +2340,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_213',
-    question: 'Dans Dr. STONE, quel est le nom du village de Senku "Village de l\'Empire de la Pierre" ?',
+    question: 'Dans Dr. STONE, quel est le nom du village de Senku ?',
     options: ['Village de l\'Empire de la Pierre', 'Village de la Science', 'Village du Soleil', 'Village de la Lune'],
     correctAnswerIndex: 0,
     explanation: 'Le Village de l\'Empire de la Pierre est le village où Senku arrive après la pétrification.',
@@ -2351,7 +2351,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_214',
-    question: 'Dans The Promised Neverland, quel est le nom de l\'organisation des démons "The Rat" ?',
+    question: 'Dans The Promised Neverland, quel est le nom de l\'organisation des démons ?',
     options: ['The Rat', 'The Mole', 'The Snake', 'The Fox'],
     correctAnswerIndex: 0,
     explanation: 'The Rat est l\'organisation des démons dans The Promised Neverland.',
@@ -2362,7 +2362,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_215',
-    question: 'Dans Fire Force, quel est le nom de la compagnie de Shinra "8e Compagnie" ?',
+    question: 'Dans Fire Force, quel est le nom de la compagnie de Shinra ?',
     options: ['8e Compagnie', '1re Compagnie', '2e Compagnie', '7e Compagnie'],
     correctAnswerIndex: 0,
     explanation: 'Shinra est membre de la 8e Compagnie de lutte contre les incendies.',
@@ -2373,7 +2373,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_216',
-    question: 'Dans Soul Eater, quel est le nom de l\'attaque de Maka "Witch Hunter" ?',
+    question: 'Dans Soul Eater, quel est le nom de l\'attaque de Maka ?',
     options: ['Witch Hunter', 'Demon Hunter', 'Soul Hunter', 'Death Hunter'],
     correctAnswerIndex: 0,
     explanation: 'Witch Hunter est l\'attaque de Maka combinant son âme avec celle de Soul.',
@@ -2384,7 +2384,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_217',
-    question: 'Dans Blue Exorcist, quel est le nom de l\'épée de Rin "Kurikara" ?',
+    question: 'Dans Blue Exorcist, quel est le nom de l\'épée de Rin ?',
     options: ['Kurikara', 'Kusanagi', 'Masamune', 'Tsurugi'],
     correctAnswerIndex: 0,
     explanation: 'Kurikara est l\'épée de Rin qui scelle son pouvoir démoniaque.',
@@ -2395,7 +2395,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_218',
-    question: 'Dans Tokyo Revengers, quel est le nom du gang de Mikey "Toman" ?',
+    question: 'Dans Tokyo Revengers, quel est le nom du gang de Mikey ?',
     options: ['Toman', 'Moebius', 'Valhalla', 'Tenjiku'],
     correctAnswerIndex: 0,
     explanation: 'Toman est le gang fondé par Mikey et ses amis.',
@@ -2406,7 +2406,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_219',
-    question: 'Dans Chainsaw Man, quel est le nom du démon de Denji "Pochita" ?',
+    question: 'Dans Chainsaw Man, quel est le nom du démon de Denji ?',
     options: ['Pochita', 'Makima', 'Power', 'Beam'],
     correctAnswerIndex: 0,
     explanation: 'Pochita est le démon de la tronçonneuse qui fusionne avec Denji.',
@@ -2417,7 +2417,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_220',
-    question: 'Dans JoJo\'s Bizarre Adventure, quel est le nom du stand de Jotaro "Star Platinum" ?',
+    question: 'Dans JoJo\'s Bizarre Adventure, quel est le nom du stand de Jotaro ?',
     options: ['Star Platinum', 'Gold Experience', 'Crazy Diamond', 'Stone Free'],
     correctAnswerIndex: 0,
     explanation: 'Star Platinum est le stand de Jotaro Kujo, capable d\'arrêter le temps.',
@@ -2428,7 +2428,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_221',
-    question: 'Dans Dragon Ball Super, quel est le nom de la première transformation de Goku "Super Saiyan God" ?',
+    question: 'Dans Dragon Ball Super, quel est le nom de la première transformation de Goku ?',
     options: ['Super Saiyan God', 'Super Saiyan Blue', 'Ultra Instinct', 'Super Saiyan 4'],
     correctAnswerIndex: 0,
     explanation: 'Super Saiyan God est la première transformation divine de Goku, obtenue lors du combat contre Beerus.',
@@ -2439,7 +2439,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_222',
-    question: 'Dans One Piece, quel est le nom du fruit du démon de Luffy "Gomu Gomu no Mi" ?',
+    question: 'Dans One Piece, quel est le nom du fruit du démon de Luffy ?',
     options: ['Gomu Gomu no Mi', 'Mera Mera no Mi', 'Yami Yami no Mi', 'Hito Hito no Mi'],
     correctAnswerIndex: 0,
     explanation: 'Gomu Gomu no Mi est le fruit du démon de Luffy, qui rend son corps élastique.',
@@ -2450,7 +2450,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_223',
-    question: 'Dans Naruto, quel est le nom de la technique de Naruto "Rasengan" ?',
+    question: 'Dans Naruto, quel est le nom de la technique de Naruto ?',
     options: ['Rasengan', 'Chidori', 'Amaterasu', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Le Rasengan est une technique de sphère de chakra créée par Minato Namikaze.',
@@ -2461,7 +2461,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_224',
-    question: 'Dans Bleach, quel est le nom de l\'attaque de Ichigo "Getsuga Tensho" ?',
+    question: 'Dans Bleach, quel est le nom de l\'attaque de Ichigo ?',
     options: ['Getsuga Tensho', 'Zangetsu', 'Tensa Zangetsu', 'Mugetsu'],
     correctAnswerIndex: 0,
     explanation: 'Getsuga Tensho est l\'attaque signature de Ichigo, libérant une vague d\'énergie.',
@@ -2472,7 +2472,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_225',
-    question: 'Dans My Hero Academia, quel est le nom du Quirk de Todoroki "Demi-glace" ?',
+    question: 'Dans My Hero Academia, quel est le nom du Quirk de Todoroki ?',
     options: ['Demi-glace', 'Explosion', 'One For All', 'Acid'],
     correctAnswerIndex: 0,
     explanation: 'Demi-glace est le Quirk de Shoto Todoroki, contrôlant la glace et le feu.',
@@ -2483,7 +2483,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_226',
-    question: 'Dans Demon Slayer, quel est le nom de la respiration de Tanjiro "Respiration de l\'Eau" ?',
+    question: 'Dans Demon Slayer, quel est le nom de la respiration de Tanjiro ?',
     options: ['Respiration de l\'Eau', 'Respiration du Feu', 'Respiration du Vent', 'Respiration du Tonnerre'],
     correctAnswerIndex: 0,
     explanation: 'Tanjiro maîtrise la Respiration de l\'Eau, héritée de son maître Urokodaki.',
@@ -2494,7 +2494,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_227',
-    question: 'Dans Jujutsu Kaisen, quel est le nom de l\'attaque de Yuji "Divergence" ?',
+    question: 'Dans Jujutsu Kaisen, quel est le nom de l\'attaque de Yuji ?',
     options: ['Divergence', 'Rasengan', 'Chidori', 'Kamehameha'],
     correctAnswerIndex: 0,
     explanation: 'Divergence est l\'attaque de Yuji qui crée un espace de distorsion.',
@@ -2505,7 +2505,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_228',
-    question: 'Dans Hunter x Hunter, quel est le nom de l\'attaque de Gon "Jajanken" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom de l\'attaque de Gon ?',
     options: ['Jajanken', 'Bungee Gum', 'Godspeed', 'Nen Infini'],
     correctAnswerIndex: 0,
     explanation: 'Jajanken est l\'attaque signature de Gon, inspirée du jeu Pierre-Feuille-Ciseaux.',
@@ -2516,7 +2516,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_229',
-    question: 'Dans Fairy Tail, quel est le nom de la magie de Gray "Ice-Make" ?',
+    question: 'Dans Fairy Tail, quel est le nom de la magie de Gray ?',
     options: ['Ice-Make', 'Fire Magic', 'Water Magic', 'Wind Magic'],
     correctAnswerIndex: 0,
     explanation: 'Gray utilise la magie Ice-Make, créant des objets de glace.',
@@ -2527,7 +2527,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_230',
-    question: 'Dans Black Clover, quel est le nom de la magie de Yuno "Spirit Magic" ?',
+    question: 'Dans Black Clover, quel est le nom de la magie de Yuno ?',
     options: ['Spirit Magic', 'Fire Magic', 'Water Magic', 'Wind Magic'],
     correctAnswerIndex: 0,
     explanation: 'Yuno utilise la Spirit Magic, contrôlant les esprits élémentaires.',
@@ -2538,7 +2538,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_231',
-    question: 'Dans Gintama, quel est le nom de la technique de Kagura "Yato Power" ?',
+    question: 'Dans Gintama, quel est le nom de la technique de Kagura ?',
     options: ['Yato Power', 'Dragon Power', 'Demon Power', 'God Power'],
     correctAnswerIndex: 0,
     explanation: 'Kagura utilise le Yato Power, hérité de son clan alien.',
@@ -2549,7 +2549,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_232',
-    question: 'Dans One Punch Man, quel est le nom de l\'attaque de Saitama "Serious Punch" ?',
+    question: 'Dans One Punch Man, quel est le nom de l\'attaque de Saitama ?',
     options: ['Serious Punch', 'Normal Punch', 'Meteor Punch', 'Omega Punch'],
     correctAnswerIndex: 0,
     explanation: 'Serious Punch est l\'attaque la plus puissante de Saitama.',
@@ -2560,7 +2560,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_233',
-    question: 'Dans Dr. STONE, quel est le nom de la potion de Senku "Nital" ?',
+    question: 'Dans Dr. STONE, quel est le nom de la potion de Senku ?',
     options: ['Nital', 'Acid', 'Base', 'Salt'],
     correctAnswerIndex: 0,
     explanation: 'Nital est la potion de Senku qui dissout la pétrification.',
@@ -2582,7 +2582,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_235',
-    question: 'Dans Fire Force, quel est le nom de l\'attaque de Shinra "Punch" ?',
+    question: 'Dans Fire Force, quel est le nom de l\'attaque de Shinra ?',
     options: ['Punch', 'Fire Punch', 'Flame Punch', 'Blazing Punch'],
     correctAnswerIndex: 1,
     explanation: 'Fire Punch est l\'attaque signature de Shinra, projetant des flammes.',
@@ -2593,7 +2593,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_236',
-    question: 'Dans Soul Eater, quel est le nom de l\'attaque de Black Star "Shadow Star" ?',
+    question: 'Dans Soul Eater, quel est le nom de l\'attaque de Black Star ?',
     options: ['Shadow Star', 'Star Light', 'Star Dust', 'Black Star'],
     correctAnswerIndex: 0,
     explanation: 'Shadow Star est l\'attaque de Black Star, utilisant les ombres.',
@@ -2604,7 +2604,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_237',
-    question: 'Dans Blue Exorcist, quel est le nom de l\'attaque de Rin "Flamme" ?',
+    question: 'Dans Blue Exorcist, quel est le nom de l\'attaque de Rin ?',
     options: ['Flamme', 'Flame', 'Fire', 'Blaze'],
     correctAnswerIndex: 0,
     explanation: 'Flamme est l\'attaque de Rin, projetant des flammes démoniaques.',
@@ -2615,7 +2615,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_238',
-    question: 'Dans Tokyo Revengers, quel est le nom du gang de Draken "Moebius" ?',
+    question: 'Dans Tokyo Revengers, quel est le nom du gang de Draken ?',
     options: ['Moebius', 'Toman', 'Valhalla', 'Tenjiku'],
     correctAnswerIndex: 0,
     explanation: 'Moebius est le gang rival de Draken dans Tokyo Revengers.',
@@ -2626,7 +2626,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_239',
-    question: 'Dans Chainsaw Man, quel est le nom de l\'attaque de Denji "Chainsaw" ?',
+    question: 'Dans Chainsaw Man, quel est le nom de l\'attaque de Denji ?',
     options: ['Chainsaw', 'Saw', 'Blade', 'Cut'],
     correctAnswerIndex: 0,
     explanation: 'Chainsaw est l\'attaque de Denji, utilisant sa tronçonneuse.',
@@ -2637,7 +2637,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_240',
-    question: 'Dans JoJo\'s Bizarre Adventure, quel est le nom du stand de Dio "The World" ?',
+    question: 'Dans JoJo\'s Bizarre Adventure, quel est le nom du stand de Dio ?',
     options: ['The World', 'Star Platinum', 'King Crimson', 'Gold Experience'],
     correctAnswerIndex: 0,
     explanation: 'The World est le stand de Dio Brando, capable d\'arrêter le temps.',
@@ -2648,7 +2648,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_241',
-    question: 'Dans Dragon Ball GT, quel est le nom de la transformation de Goku "Super Saiyan 4" ?',
+    question: 'Dans Dragon Ball GT, quel est le nom de la transformation de Goku ?',
     options: ['Super Saiyan 4', 'Super Saiyan God', 'Ultra Instinct', 'Super Saiyan Blue'],
     correctAnswerIndex: 0,
     explanation: 'Super Saiyan 4 est la transformation exclusive de Dragon Ball GT, combinant la queue de singe.',
@@ -2659,7 +2659,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_242',
-    question: 'Dans One Piece, quel est le nom du fruit du démon de Ace "Mera Mera no Mi" ?',
+    question: 'Dans One Piece, quel est le nom du fruit du démon de Ace ?',
     options: ['Mera Mera no Mi', 'Gomu Gomu no Mi', 'Yami Yami no Mi', 'Hito Hito no Mi'],
     correctAnswerIndex: 0,
     explanation: 'Mera Mera no Mi est le fruit du démon de Ace, lui donnant le contrôle du feu.',
@@ -2670,7 +2670,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_243',
-    question: 'Dans Naruto, quel est le nom de la technique de Sasuke "Chidori" ?',
+    question: 'Dans Naruto, quel est le nom de la technique favorite de Sasuke ?',
     options: ['Chidori', 'Rasengan', 'Amaterasu', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Chidori est la technique de Sasuke, une décharge d\'électricité concentrée.',
@@ -2681,7 +2681,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_244',
-    question: 'Dans Bleach, quel est le nom de la Bankai de Hitsugaya "Daiguren Hyorinmaru" ?',
+    question: 'Dans Bleach, quel est le nom de la Bankai de Hitsugaya ?',
     options: ['Daiguren Hyorinmaru', 'Tensa Zangetsu', 'Senbonsakura Kageyoshi', 'Kyouka Suigetsu'],
     correctAnswerIndex: 0,
     explanation: 'Daiguren Hyorinmaru est la Bankai de Toshiro Hitsugaya, contrôlant la glace.',
@@ -2692,7 +2692,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_245',
-    question: 'Dans My Hero Academia, quel est le nom du Quirk de All Might "One For All" ?',
+    question: 'Dans My Hero Academia, quel est le nom du Quirk de All Might ?',
     options: ['One For All', 'All For One', 'Explosion', 'Demi-glace'],
     correctAnswerIndex: 0,
     explanation: 'One For All est le Quirk de All Might, transmis de génération en génération.',
@@ -2703,7 +2703,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_246',
-    question: 'Dans Demon Slayer, quel est le nom de la respiration de Rengoku "Respiration du Feu" ?',
+    question: 'Dans Demon Slayer, quel est le nom de la respiration de Rengoku ?',
     options: ['Respiration du Feu', 'Respiration de l\'Eau', 'Respiration du Vent', 'Respiration du Tonnerre'],
     correctAnswerIndex: 0,
     explanation: 'Rengoku maîtrise la Respiration du Feu, la plus puissante des respirations.',
@@ -2714,7 +2714,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_247',
-    question: 'Dans Jujutsu Kaisen, quel est le nom du domaine de Megumi "Chimera Shadow Garden" ?',
+    question: 'Dans Jujutsu Kaisen, quel est le nom du domaine de Megumi ?',
     options: ['Chimera Shadow Garden', 'Jardin de l\'Ombre', 'Ombre Infinie', 'Lame des Ombres'],
     correctAnswerIndex: 0,
     explanation: 'Chimera Shadow Garden est l\'Extension du Territoire de Megumi Fushiguro.',
@@ -2725,7 +2725,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_248',
-    question: 'Dans Hunter x Hunter, quel est le nom du Nen de Kurapika "Chaîne de l\'Emprisonnement" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom du Nen de Kurapika ?',
     options: ['Chaîne de l\'Emprisonnement', 'Chaîne de la Guérison', 'Chaîne de la Mort', 'Chaîne du Jugement'],
     correctAnswerIndex: 0,
     explanation: 'La Chaîne de l\'Emprisonnement est une technique de Kurapika contre la Brigade Fantôme.',
@@ -2736,7 +2736,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_249',
-    question: 'Dans Fairy Tail, quel est le nom de la magie de Lucy "Gate Key" ?',
+    question: 'Dans Fairy Tail, quel est le nom de la magie de Lucy ?',
     options: ['Gate Key', 'Spirit Magic', 'Celestial Spirit', 'Dragon Slayer'],
     correctAnswerIndex: 0,
     explanation: 'Lucy utilise la magie des clés célestes, invoquant des esprits stellaires.',
@@ -2747,7 +2747,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_250',
-    question: 'Dans Black Clover, quel est le nom de la magie de Noelle "Sea Dragon\'s Roar" ?',
+    question: 'Dans Black Clover, quel est le nom de la magie de Noelle ?',
     options: ['Sea Dragon\'s Roar', 'Water Dragon', 'Dragon\'s Breath', 'Aqua Dragon'],
     correctAnswerIndex: 0,
     explanation: 'Sea Dragon\'s Roar est la technique de Noelle Silva, créant un dragon d\'eau.',
@@ -2756,7 +2756,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     difficulty: 'easy',
     badgeEmoji: '🐉'
   },
-    {
+  {
     id: 'q_shonen_251',
     question: 'Dans My Hero Academia, quel est le nom du père de Shoto Todoroki ?',
     options: ['Enji Todoroki', 'Endeavor', 'Dabi', 'Natsuo'],
@@ -3209,7 +3209,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_292',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Kakashi "Kamui" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique dojutsu de Kakashi ?',
     options: ['Kamui', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'Kamui est la technique d\'espace-temps de Kakashi, utilisant le Mangekyo Sharingan.',
@@ -3286,7 +3286,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_299',
-    question: 'Dans Hunter x Hunter, quel est le nom de la technique de Hisoka "Bungee Gum" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom de la technique de Hisoka ?',
     options: ['Bungee Gum', 'Godspeed', 'Jajanken', 'Nen Infini'],
     correctAnswerIndex: 0,
     explanation: 'Bungee Gum est la technique de Hisoka, un Nen élastique.',
@@ -3306,7 +3306,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     difficulty: 'easy',
     badgeEmoji: '🤝'
   },
-    {
+  {
     id: 'q_shonen_301',
     question: 'Dans My Hero Academia, quel est le nom du Quirk d\'Ochaco Uraraka ?',
     options: ['Zero Gravity', 'Explosion', 'Demi-glace', 'Acid'],
@@ -3374,7 +3374,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_307',
-    question: 'Dans Dragon Ball Super, quel est le nom de la transformation de Goku "Ultra Instinct" ?',
+    question: 'Dans Dragon Ball Super, quel est le nom de la transformation ultime de Goku ?',
     options: ['Ultra Instinct', 'Super Saiyan God', 'Super Saiyan Blue', 'Super Saiyan 4'],
     correctAnswerIndex: 0,
     explanation: 'L\'Ultra Instinct est la transformation divine de Goku, dépassant les limites des Saiyans.',
@@ -3462,7 +3462,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_315',
-    question: 'Dans Jujutsu Kaisen, quel est le nom de l\'attaque de Yuji "Divergence" ?',
+    question: 'Dans Jujutsu Kaisen, quel est le nom de l\'attaque de Yuji ?',
     options: ['Divergence', 'Rasengan', 'Chidori', 'Kamehameha'],
     correctAnswerIndex: 0,
     explanation: 'Divergence est l\'attaque de Yuji qui crée un espace de distorsion.',
@@ -3594,7 +3594,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_327',
-    question: 'Dans Dragon Ball Super, quel est le nom de la transformation de Vegeta "Super Saiyan Blue Evolution" ?',
+    question: 'Dans Dragon Ball Super, quel est le nom de la transformation god de Vegeta ?',
     options: ['Super Saiyan Blue Evolution', 'Ultra Instinct', 'Super Saiyan God', 'Super Saiyan 4'],
     correctAnswerIndex: 0,
     explanation: 'Super Saiyan Blue Evolution est la transformation améliorée de Vegeta dans Dragon Ball Super.',
@@ -3616,7 +3616,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_329',
-    question: 'Dans Hunter x Hunter, quel est le nom de la technique de Killua "Godspeed" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom de la technique de Killua ?',
     options: ['Godspeed', 'Jajanken', 'Bungee Gum', 'Nen Infini'],
     correctAnswerIndex: 0,
     explanation: 'Godspeed est la technique de Killua utilisant l\'électricité pour augmenter sa vitesse.',
@@ -3649,7 +3649,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_332',
-    question: 'Dans Naruto, quel est le nom de la technique de Sasuke "Chidori" ?',
+    question: 'Dans Naruto, quel est le nom de la technique favorite de Sasuke ?',
     options: ['Chidori', 'Rasengan', 'Amaterasu', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Chidori est la technique de Sasuke, une décharge d\'électricité concentrée.',
@@ -3671,7 +3671,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_334',
-    question: 'Dans Bleach, quel est le nom de l\'attaque de Ichigo "Getsuga Tensho" ?',
+    question: 'Dans Bleach, quel est le nom de l\'attaque de Ichigo ?',
     options: ['Getsuga Tensho', 'Zangetsu', 'Tensa Zangetsu', 'Mugetsu'],
     correctAnswerIndex: 0,
     explanation: 'Getsuga Tensho est l\'attaque signature de Ichigo, libérant une vague d\'énergie.',
@@ -3704,7 +3704,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_337',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Vegeta "Final Flash" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique favorite de Vegeta ?',
     options: ['Final Flash', 'Kamehameha', 'Genkidama', 'Destructo Disc'],
     correctAnswerIndex: 0,
     explanation: 'Final Flash est l\'attaque signature de Vegeta, un rayon d\'énergie dévastateur.',
@@ -3726,7 +3726,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_339',
-    question: 'Dans Hunter x Hunter, quel est le nom de l\'attaque de Gon "Jajanken" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom de l\'attaque de Gon?',
     options: ['Jajanken', 'Bungee Gum', 'Godspeed', 'Nen Infini'],
     correctAnswerIndex: 0,
     explanation: 'Jajanken est l\'attaque signature de Gon, inspirée du jeu Pierre-Feuille-Ciseaux.',
@@ -3759,7 +3759,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_342',
-    question: 'Dans Naruto, quel est le nom de la technique de Naruto "Rasengan" ?',
+    question: 'Dans Naruto, quel est le nom de la technique special de Naruto ?',
     options: ['Rasengan', 'Chidori', 'Amaterasu', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Le Rasengan est une technique de sphère de chakra créée par Minato Namikaze.',
@@ -3814,7 +3814,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_347',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Piccolo "Special Beam Cannon" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Piccolo ?',
     options: ['Special Beam Cannon', 'Kamehameha', 'Genkidama', 'Destructo Disc'],
     correctAnswerIndex: 0,
     explanation: 'Le Special Beam Cannon est l\'attaque signature de Piccolo, perçant tout.',
@@ -3836,7 +3836,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_349',
-    question: 'Dans Hunter x Hunter, quel est le nom de la technique de Kurapika "Chaîne de l\'Emprisonnement" ?',
+    question: 'Dans Hunter x Hunter, quel est le nom de la technique de Kurapika ?',
     options: ['Chaîne de l\'Emprisonnement', 'Chaîne de la Guérison', 'Chaîne de la Mort', 'Chaîne du Jugement'],
     correctAnswerIndex: 0,
     explanation: 'La Chaîne de l\'Emprisonnement est une technique de Kurapika contre la Brigade Fantôme.',
@@ -3856,7 +3856,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     difficulty: 'easy',
     badgeEmoji: '👑'
   },
-    {
+  {
     id: 'q_shonen_351',
     question: 'Dans My Hero Academia, quel est le nom du Quirk de Tsuyu Asui ?',
     options: ['Frog', 'Engine', 'Explosion', 'Demi-glace'],
@@ -3869,7 +3869,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_352',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Pain "Shinra Tensei" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Pain ?',
     options: ['Shinra Tensei', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'Shinra Tensei est la technique de Pain qui repousse tout sur son passage.',
@@ -3902,7 +3902,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_355',
-    question: 'Dans Jujutsu Kaisen, quel est le nom de la technique de Nobara Kugisaki "Résonance" ?',
+    question: 'Dans Jujutsu Kaisen, quel est le nom de la technique de Nobara Kugisaki ?',
     options: ['Résonance', 'Divergence', 'Domaine Infini', 'Dix Ombres'],
     correctAnswerIndex: 0,
     explanation: 'Nobara Kugisaki utilise la technique "Résonance" pour attaquer ses ennemis à distance.',
@@ -3924,7 +3924,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_357',
-    question: 'Dans Dragon Ball Z, quel est le nom de l\'attaque de Vegeta "Galick Gun" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de l\'attaque de Vegeta ?',
     options: ['Galick Gun', 'Kamehameha', 'Genkidama', 'Final Flash'],
     correctAnswerIndex: 0,
     explanation: 'Le Galick Gun est l\'attaque signature de Vegeta, un rayon d\'énergie violet.',
@@ -4122,7 +4122,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_375',
-    question: 'Dans Jujutsu Kaisen, quel est le nom du domaine de Satoru Gojo "Muryōkūsho" ?',
+    question: 'Dans Jujutsu Kaisen, quel est le nom du domaine de Satoru Gojo ?',
     options: ['Muryōkūsho', 'Chimera Shadow Garden', 'Dix Ombres', 'Résonance'],
     correctAnswerIndex: 0,
     explanation: 'Muryōkūsho est le domaine infini de Satoru Gojo dans Jujutsu Kaisen.',
@@ -4144,7 +4144,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_377',
-    question: 'Dans Dragon Ball Z, quel est le nom de l\'attaque de Trunks "Burning Attack" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de l\'attaque special de Trunks ?',
     options: ['Burning Attack', 'Kamehameha', 'Genkidama', 'Final Flash'],
     correctAnswerIndex: 0,
     explanation: 'Burning Attack est l\'attaque signature de Trunks, un rayon d\'énergie.',
@@ -4199,7 +4199,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_382',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Pain "Chibaku Tensei" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Pain ?',
     options: ['Chibaku Tensei', 'Shinra Tensei', 'Rasengan', 'Chidori'],
     correctAnswerIndex: 0,
     explanation: 'Chibaku Tensei est la technique de Pain qui crée une météore de terre.',
@@ -4232,7 +4232,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_385',
-    question: 'Dans Jujutsu Kaisen, quel est le nom de la technique de Maki Zenin "Arme Maudite" ?',
+    question: 'Dans Jujutsu Kaisen, quel est le nom de la technique de Maki Zenin ?',
     options: ['Arme Maudite', 'Résonance', 'Divergence', 'Domaine Infini'],
     correctAnswerIndex: 0,
     explanation: 'Maki Zenin utilise des armes maudites pour combattre dans Jujutsu Kaisen.',
@@ -4254,7 +4254,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_387',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Gohan "Masenko" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique favorite de Gohan ?',
     options: ['Masenko', 'Kamehameha', 'Genkidama', 'Final Flash'],
     correctAnswerIndex: 0,
     explanation: 'Masenko est l\'attaque signature de Gohan, apprise de Piccolo.',
@@ -4364,7 +4364,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_397',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Krillin "Destructo Disc" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique special de Krillin ?',
     options: ['Destructo Disc', 'Kamehameha', 'Genkidama', 'Final Flash'],
     correctAnswerIndex: 0,
     explanation: 'Le Destructo Disc est une technique de Krillin qui coupe tout.',
@@ -4406,7 +4406,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     difficulty: 'easy',
     badgeEmoji: '⚔️'
   },
-    {
+  {
     id: 'q_shonen_401',
     question: 'Dans My Hero Academia, quel est le nom du Quirk de Kyoka Jiro ?',
     options: ['Earphone Jack', 'Explosion', 'Demi-glace', 'Acid'],
@@ -4625,7 +4625,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     category: 'shonen',
     difficulty: 'easy',
     badgeEmoji: '🪓'
-  },  {
+  }, {
     id: 'q_shonen_421',
     question: 'Dans My Hero Academia, quel est le nom du Quirk de Mezo Shoji ?',
     options: ['Dupli-Arms', 'Explosion', 'Demi-glace', 'Acid'],
@@ -4638,7 +4638,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_422',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique d\'Itachi "Amaterasu" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique d\'Itachi ?',
     options: ['Amaterasu', 'Chidori', 'Rasengan', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Amaterasu est la technique de Itachi, des flammes noires qui brûlent tout.',
@@ -4715,7 +4715,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_429',
-    question: 'Dans Hunter x Hunter, quel est le nom du chasseur de trésors Kurapika ?',
+    question: 'Dans Hunter x Hunter, quel est le nom du chasseur de trésors ?',
     options: ['Kurapika', 'Gon Freecss', 'Killua Zoldyck', 'Leorio'],
     correctAnswerIndex: 0,
     explanation: 'Kurapika est un chasseur de trésors du clan Kurta dans Hunter x Hunter.',
@@ -4748,7 +4748,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_432',
-    question: 'Dans Naruto, quel est le nom de la technique de Hinata "Rotation" ?',
+    question: 'Dans Naruto, quel est le nom de la technique de Hinata ?',
     options: ['Rotation', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'La Rotation est une technique de défense du clan Hyuga dans Naruto.',
@@ -4858,7 +4858,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_442',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Sasuke "Susanoo" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la techniquede protection de Sasuke ?',
     options: ['Susanoo', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'Susanoo est la technique ultime de Sasuke, un avatar de chakra.',
@@ -4913,7 +4913,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_447',
-    question: 'Dans Dragon Ball Super, quel est le nom de la transformation de Vegeta "Super Saiyan Blue" ?',
+    question: 'Dans Dragon Ball Super, quel est le nom de la transformation ultime de Vegeta face a goku ?',
     options: ['Super Saiyan Blue', 'Ultra Instinct', 'Super Saiyan God', 'Super Saiyan 4'],
     correctAnswerIndex: 0,
     explanation: 'Super Saiyan Blue est la transformation divine de Vegeta, combinant le Super Saiyan God.',
@@ -4955,7 +4955,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     difficulty: 'easy',
     badgeEmoji: '👑'
   },
-    {
+  {
     id: 'q_shonen_451',
     question: 'Dans My Hero Academia, quel est le nom du Quirk de Hanta Sero ?',
     options: ['Tape', 'Explosion', 'Demi-glace', 'Acid'],
@@ -4968,7 +4968,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_452',
-    question: 'Dans Naruto, quel est le nom de la technique de Neji "Rotation" ?',
+    question: 'Dans Naruto, quel est le nom de la technique de Neji ?',
     options: ['Rotation', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'La Rotation est une technique défensive du clan Hyuga dans Naruto.',
@@ -5023,7 +5023,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_457',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Piccolo "Fusion" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Piccolo ?',
     options: ['Fusion', 'Kamehameha', 'Genkidama', 'Destructo Disc'],
     correctAnswerIndex: 0,
     explanation: 'Piccolo utilise la fusion pour absorber Nail et Kami dans Dragon Ball Z.',
@@ -5078,7 +5078,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_462',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Sasuke "Chidori" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique favorite de Sasuke ?',
     options: ['Chidori', 'Rasengan', 'Amaterasu', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Chidori est la technique de Sasuke, une décharge d\'électricité concentrée.',
@@ -5133,7 +5133,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_467',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Tien "Kikoho" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Tien ?',
     options: ['Kikoho', 'Kamehameha', 'Genkidama', 'Destructo Disc'],
     correctAnswerIndex: 0,
     explanation: 'Le Kikoho est une technique puissante de Tien, utilisant sa propre énergie vitale.',
@@ -5188,7 +5188,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_472',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Naruto "Rasenshuriken" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Naruto ?',
     options: ['Rasenshuriken', 'Chidori', 'Amaterasu', 'Susanoo'],
     correctAnswerIndex: 0,
     explanation: 'Le Rasenshuriken est la technique de Naruto, un shuriken de chakra.',
@@ -5298,7 +5298,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_482',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Madara "Perfect Susanoo" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Madara ?',
     options: ['Perfect Susanoo', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'Le Perfect Susanoo est la technique ultime de Madara, un avatar géant de chakra.',
@@ -5353,7 +5353,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_487',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Yamcha "Wolf Fang Fist" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Yamcha ?',
     options: ['Wolf Fang Fist', 'Kamehameha', 'Genkidama', 'Destructo Disc'],
     correctAnswerIndex: 0,
     explanation: 'Wolf Fang Fist est l\'attaque signature de Yamcha, imitant un loup.',
@@ -5408,7 +5408,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_492',
-    question: 'Dans Naruto Shippuden, quel est le nom de la technique de Naruto "Shadow Clone" ?',
+    question: 'Dans Naruto Shippuden, quel est le nom de la technique favorite de Naruto ?',
     options: ['Shadow Clone', 'Chidori', 'Rasengan', 'Amaterasu'],
     correctAnswerIndex: 0,
     explanation: 'Le Shadow Clone est une technique de Naruto créant des clones de lui-même.',
@@ -5463,7 +5463,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'q_shonen_497',
-    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Chiaotzu "Psychokinesis" ?',
+    question: 'Dans Dragon Ball Z, quel est le nom de la technique de Chiaotzu ?',
     options: ['Psychokinesis', 'Kamehameha', 'Genkidama', 'Destructo Disc'],
     correctAnswerIndex: 0,
     explanation: 'Chiaotzu utilise la psychokinésie, un pouvoir télékinétique.',
@@ -5505,7 +5505,7 @@ export const OTAKU_QUESTIONS: QuizQuestion[] = [
     difficulty: 'easy',
     badgeEmoji: '👑'
   },
-  
+
 
 
   // ============================================================
