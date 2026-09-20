@@ -432,10 +432,10 @@ async function validateAllGameAnswersBatch(roomId: string): Promise<void> {
 
   try {
     // Appeler l'API de validation batch UNE SEULE FOIS
-    // Construire l'URL complète pour les appels serveur
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000';
+    // Construire l'URL pour les appels serveur
+    const baseUrl = typeof window === 'undefined' 
+      ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+      : ''; // Côté client, URL relative suffit
     
     const response = await fetch(`${baseUrl}/api/groq/validate-batch`, {
       method: 'POST',
