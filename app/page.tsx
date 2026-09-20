@@ -207,21 +207,21 @@ function HomeContent() {
                 </h3>
                 
                 <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                  Citez un maximum de personnages d&apos;anime correspondant au thème ! L&apos;IA génère les défis et valide vos réponses.
+                  Citez un maximum de personnages d&apos;anime correspondant au thème ! Toutes vos réponses sont validées en une seule fois à la fin.
                 </p>
 
                 <div className="space-y-2 mb-6">
                   <div className="flex items-start gap-2 text-xs text-slate-400">
                     <Zap className="w-4 h-4 text-neon-magenta shrink-0 mt-0.5" />
-                    <span><strong className="text-white">Durée:</strong> 15 secondes par thème (20 thèmes)</span>
+                    <span><strong className="text-white">Format:</strong> 15s par thème, 20 thèmes au total</span>
                   </div>
                   <div className="flex items-start gap-2 text-xs text-slate-400">
                     <Users className="w-4 h-4 text-neon-magenta shrink-0 mt-0.5" />
-                    <span><strong className="text-white">Joueurs:</strong> 2-6 joueurs simultanés</span>
+                    <span><strong className="text-white">Multijoueur:</strong> 2-6 joueurs simultanés</span>
                   </div>
                   <div className="flex items-start gap-2 text-xs text-slate-400">
                     <Trophy className="w-4 h-4 text-neon-magenta shrink-0 mt-0.5" />
-                    <span><strong className="text-white">Score:</strong> 1 point par personnage valide</span>
+                    <span><strong className="text-white">Validation:</strong> IA valide toutes réponses à la fin du jeu</span>
                   </div>
                 </div>
 
