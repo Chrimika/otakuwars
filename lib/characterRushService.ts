@@ -372,6 +372,147 @@ export async function startCharacterRushGame(roomId: string): Promise<void> {
 /**
  * Passer au thème suivant
  */
+export /**
+ * Valider toutes les réponses en batch pour un thème donné
+ */
+async function validateThemeAnswersBatch(roomId: string, themeId: string): Promise<void> {
+  const db = getRequiredDb();
+  const roomRef = doc(db, 'characterRushRooms', roomId);
+  const roomSnap = await getDoc(roomRef);
+
+  if (!roomSnap.exists()) return;
+
+  const room = roomSnap.data() as CharacterRushRoom;
+  const theme = room.themes.find(t => t.id === themeId);
+  if (!theme) return;
+
+  console.log(`🔍 Validation batch pour thème "${theme.theme}"...`);
+
+  // Collecter toutes les réponses de tous les joueurs pour ce thème
+  const allAnswersToValidate: Array<{
+    userId: string;
+    characterName: string;
+    answerIndex: number;
+  }> = [];
+
+  Object.entries(room.players).forEach(([userId, player]) => {
+    const answers = player.answers[themeId] || [];
+    answers.forEach((answer, index) => {
+      if (answer.validationStatus === 'pending') {
+        allAnswersToValidate.push({
+          userId,
+          characterName: answer.characterName,
+          answerIndex: index,
+        });
+      }
+    });
+  });
+
+  if (allAnswersToValidate.length === 0) {
+    console.log('✅ Aucune réponse à valider');
+    return;
+  }
+
+  console.log(`🔍 ${allAnswersToValidate.length} réponses à valider...`);
+
+  // Préparer la requête batch
+  const validationRequests = allAnswersToValidate.map(a => ({
+    characterName: a.characterName,
+    theme: theme.theme,
+    themeEn: theme.themeEn,
+  }));
+
+  try {
+    // Appeler l'API de validation batch
+    const response = await fetch('/api/groq/validate-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers: validationRequests }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Batch validation failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const results = data.results || [];
+
+    console.log(`✅ Validation terminée: ${results.filter((r: any) => r.valid).length}/${results.length} valides`);
+
+    // Mettre à jour toutes les réponses dans Firebase
+    const updates: Record<string, any> = {};
+    
+    allAnswersToValidate.forEach((answerData, index) => {
+      const result = results[index];
+      if (!result) return;
+
+      const { userId, answerIndex } = answerData;
+      const player = room.players[userId];
+      const answers = [...(player.answers[themeId] || [])];
+      
+      if (answers[answerIndex]) {
+        answers[answerIndex] = {
+          ...answers[answerIndex],
+          validationStatus: result.valid ? 'valid' : 'invalid',
+          confidence: result.confidence,
+          reason: result.reason,
+          details: result.details, // Nouveau champ avec détails
+        };
+
+        updates[`players.${userId}.answers.${themeId}`] = answers;
+      }
+    });
+
+    // Recalculer les scores
+    Object.entries(room.players).forEach(([userId, player]) => {
+      let totalValidAnswers = 0;
+      Object.values(player.answers).forEach((themeAnswers) => {
+        themeAnswers.forEach((answer) => {
+          if (answer.validationStatus === 'valid') {
+            totalValidAnswers++;
+          }
+        });
+      });
+      updates[`players.${userId}.score`] = totalValidAnswers;
+    });
+
+    updates.updatedAt = Date.now();
+
+    await updateDoc(roomRef, updates);
+    console.log('✅ Firebase mis à jour avec les résultats');
+
+  } catch (error) {
+    console.error('❌ Erreur validation batch:', error);
+    // En cas d'erreur, on accepte toutes les réponses par défaut
+    const updates: Record<string, any> = {};
+    
+    allAnswersToValidate.forEach((answerData) => {
+      const { userId, answerIndex } = answerData;
+      const player = room.players[userId];
+      const answers = [...(player.answers[themeId] || [])];
+      
+      if (answers[answerIndex]) {
+        answers[answerIndex] = {
+          ...answers[answerIndex],
+          validationStatus: 'valid',
+          confidence: 0.6,
+          reason: 'Validation automatique (erreur)',
+          details: 'Accepté automatiquement suite à une erreur de validation.',
+        };
+
+        updates[`players.${userId}.answers.${themeId}`] = answers;
+        updates[`players.${userId}.score`] = (room.players[userId].score || 0) + 1;
+      }
+    });
+
+    updates.updatedAt = Date.now();
+    await updateDoc(roomRef, updates);
+  }
+}
+
+/**
+ * Avancer au thème suivant (et valider les réponses du thème actuel)
+ */
 export async function advanceToNextTheme(roomId: string): Promise<void> {
   const db = getRequiredDb();
   const roomRef = doc(db, 'characterRushRooms', roomId);
@@ -380,6 +521,13 @@ export async function advanceToNextTheme(roomId: string): Promise<void> {
   if (!roomSnap.exists()) return;
 
   const room = roomSnap.data() as CharacterRushRoom;
+  const currentTheme = room.themes[room.currentThemeIndex];
+
+  // 🔥 VALIDER TOUTES LES RÉPONSES DU THÈME ACTUEL EN BATCH
+  if (currentTheme) {
+    await validateThemeAnswersBatch(roomId, currentTheme.id);
+  }
+
   const nextIndex = room.currentThemeIndex + 1;
 
   if (nextIndex >= room.themes.length) {
@@ -406,6 +554,9 @@ export async function advanceToNextTheme(roomId: string): Promise<void> {
 
 /**
  * Soumettre une réponse (personnage)
+ */
+export /**
+ * Soumettre une réponse (acceptée localement, validation à la fin du thème)
  */
 export async function submitCharacterAnswer(
   roomId: string,
@@ -438,11 +589,11 @@ export async function submitCharacterAnswer(
     throw new Error('Personnage déjà soumis');
   }
 
-  // Créer la nouvelle réponse (validation en attente)
+  // Créer la nouvelle réponse (acceptée localement, validation plus tard)
   const newAnswer: CharacterRushAnswer = {
     characterName: characterName.trim(),
     submittedAt: Date.now(),
-    validationStatus: 'pending',
+    validationStatus: 'pending', // Sera validé à la fin du thème
   };
 
   // Ajouter la réponse
@@ -453,8 +604,7 @@ export async function submitCharacterAnswer(
     updatedAt: Date.now(),
   });
 
-  // Lancer la validation en arrière-plan (ne pas attendre)
-  validateAnswerAsync(roomId, userId, themeId, characterName, currentTheme.theme, currentTheme.themeEn);
+  // PAS de validation immédiate! On valide tout en batch à la fin du thème
 }
 
 /**

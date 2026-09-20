@@ -120,20 +120,28 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!characterInput.trim() || isSubmitting || !currentTheme) return;
+    if (!characterInput.trim() || isSubmitting || !currentTheme || timeLeft === 0) return;
 
+    const trimmedInput = characterInput.trim();
     setIsSubmitting(true);
     setErrorMsg('');
 
     try {
+      // Soumission LOCALE immédiate (pas de validation API)
       await submitCharacterAnswer(
         room.id,
         user.uid,
         currentTheme.id,
-        characterInput.trim()
+        trimmedInput
       );
+      
+      // Feedback visuel positif immédiat
       soundFx.playCorrect();
       setCharacterInput('');
+      
+      // Message d'encouragement
+      setErrorMsg(''); // Pas d'erreur, tout est accepté localement
+      
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Erreur';
       setErrorMsg(msg);
@@ -261,6 +269,14 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
                   )}
                 </button>
               </div>
+
+              {/* Message d'encouragement */}
+              {myAnswers.length > 0 && timeLeft > 0 && (
+                <p className="text-xs text-green-400 flex items-center gap-1 animate-fade-in">
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  ✅ {myAnswers.length} réponse{myAnswers.length > 1 ? 's' : ''} enregistrée{myAnswers.length > 1 ? 's' : ''}! Continue!
+                </p>
+              )}
 
               {errorMsg && (
                 <p className="text-xs text-red-400 flex items-center gap-1">

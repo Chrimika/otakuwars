@@ -118,8 +118,9 @@ export interface CharacterRushAnswer {
   characterName: string;
   submittedAt: number; // Timestamp
   validationStatus: 'pending' | 'valid' | 'invalid';
-  validationReason?: string;
-  validationConfidence?: number;
+  confidence?: number; // 0-1 (anciennement validationConfidence)
+  reason?: string; // Explication courte (anciennement validationReason)
+  details?: string; // Explication détaillée avec anime et raison
 }
 
 export interface CharacterRushPlayer {
