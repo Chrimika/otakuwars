@@ -1,10 +1,8 @@
 /**
  * Service Gemini AI pour le jeu "Rafale Otaku"
  * Génère des questions thématiques et valide les réponses des joueurs
+ * Utilise des API routes Next.js pour sécuriser la clé API
  */
-
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 export interface CharacterRushTheme {
   id: string;
@@ -16,67 +14,19 @@ export interface CharacterRushTheme {
  * Génère N questions thématiques créatives pour le jeu
  */
 export async function generateCharacterRushThemes(count: number = 20): Promise<CharacterRushTheme[]> {
-  const prompt = `Tu es un expert en animes et mangas. Génère exactement ${count} thèmes créatifs et variés pour un jeu où les joueurs doivent citer des personnages d'anime correspondant au thème.
-
-RÈGLES IMPORTANTES:
-- Les thèmes doivent être clairs et non ambigus
-- Varie les catégories: apparence physique, pouvoirs, personnalité, rôle, armes, etc.
-- Évite les thèmes trop larges (ex: "personnages forts") ou trop restrictifs (ex: "personnages dans un épisode spécifique")
-- Assure-toi que plusieurs personnages populaires correspondent à chaque thème
-- Les thèmes doivent être en français
-
-EXEMPLES DE BONS THÈMES:
-- Personnages aux cheveux rouges
-- Sabreurs légendaires
-- Personnages capables de voler
-- Personnages avec des lunettes
-- Utilisateurs de magie de feu
-- Personnages immortels ou très âgés
-- Ninjas célèbres
-- Personnages cyborgs ou robots
-- Personnages avec des cicatrices visibles
-- Capitaines ou leaders d'équipe
-
-Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans \`\`\`json):
-{
-  "themes": [
-    {"theme": "Description en français", "themeEn": "Description in English"},
-    ...
-  ]
-}`;
-
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch('/api/gemini/generate-themes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.9,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-      }),
+      body: JSON.stringify({ count }),
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    // Nettoyer la réponse (enlever markdown si présent)
-    let cleanedText = textContent.trim();
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const parsed = JSON.parse(cleanedText);
-    const themes = parsed.themes || [];
+    const themes = data.themes || [];
 
     // Ajouter des IDs uniques
     return themes.slice(0, count).map((t: { theme: string; themeEn: string }, index: number) => ({
@@ -99,63 +49,23 @@ export async function validateCharacterForTheme(
   theme: string,
   themeEn: string
 ): Promise<{ valid: boolean; confidence: number; reason?: string }> {
-  const prompt = `Tu es un expert en animes et mangas. Un joueur a proposé le personnage "${characterName}" pour le thème: "${theme}" (${themeEn}).
-
-RÈGLES DE VALIDATION:
-- Le personnage doit être un personnage d'anime/manga connu
-- Le personnage doit correspondre clairement au thème
-- Sois tolérant avec les variantes de noms (ex: "Naruto", "Naruto Uzumaki", "Uzumaki Naruto")
-- Accepte les surnoms courants (ex: "Mugiwara" pour Luffy, "Pirate Hunter" pour Zoro)
-- Rejette les personnages qui ne correspondent PAS au thème
-- Rejette les noms inventés ou les noms de personnes réelles
-
-Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans \`\`\`json):
-{
-  "valid": true ou false,
-  "confidence": nombre entre 0 et 1,
-  "reason": "Courte explication en français"
-}
-
-Exemples:
-- Si le thème est "cheveux rouges" et le personnage est "Shanks": {"valid": true, "confidence": 0.95, "reason": "Shanks a les cheveux rouges"}
-- Si le thème est "cheveux rouges" et le personnage est "Goku": {"valid": false, "confidence": 0.9, "reason": "Goku a les cheveux noirs"}`;
-
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch('/api/gemini/validate-character', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.3, // Plus bas pour des réponses cohérentes
-          topK: 20,
-          topP: 0.8,
-          maxOutputTokens: 256,
-        },
-      }),
+      body: JSON.stringify({ characterName, theme, themeEn }),
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    // Nettoyer la réponse
-    let cleanedText = textContent.trim();
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const parsed = JSON.parse(cleanedText);
     
     return {
-      valid: parsed.valid === true,
-      confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
-      reason: parsed.reason || '',
+      valid: data.valid === true,
+      confidence: typeof data.confidence === 'number' ? data.confidence : 0.5,
+      reason: data.reason || '',
     };
   } catch (error) {
     console.error('Error validating character:', error);
