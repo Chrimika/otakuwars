@@ -234,6 +234,8 @@ export async function resetCharacterRushRoom(roomId: string): Promise<void> {
 
   const room = roomSnap.data() as CharacterRushRoom;
 
+  console.log('🔄 RESET ROOM:', roomId, '- Thèmes avant:', room.themes?.length || 0);
+
   // Réinitialiser tous les joueurs
   const resetPlayers: Record<string, CharacterRushPlayer> = {};
   Object.entries(room.players || {}).forEach(([uid, player]) => {
@@ -249,12 +251,14 @@ export async function resetCharacterRushRoom(roomId: string): Promise<void> {
   await updateDoc(roomRef, {
     state: 'waiting',
     players: resetPlayers,
-    themes: [],
+    themes: [], // ⚠️ VIDER les thèmes!
     currentThemeIndex: 0,
     themeStartTime: null,
     isGeneratingThemes: false,
     updatedAt: Date.now(),
   });
+
+  console.log('✅ RESET DONE - Thèmes vidés, room en état waiting');
 }
 
 /**
@@ -341,7 +345,9 @@ export async function startCharacterRushGame(roomId: string): Promise<void> {
 
   try {
     // Générer les thèmes avec Gemini
+    console.log('🎨 Génération de', room.totalThemes, 'thèmes avec Gemini...');
     const themes = await generateCharacterRushThemes(room.totalThemes);
+    console.log('✅ Thèmes générés:', themes.length, '- Premier thème:', themes[0]?.theme);
 
     // Démarrer le jeu
     await updateDoc(roomRef, {

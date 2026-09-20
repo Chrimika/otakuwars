@@ -21,47 +21,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Tu es un expert STRICT en animes et mangas. Un joueur a proposé le personnage "${characterName}" pour le thème: "${theme}" (${themeEn}).
+    const prompt = `Tu es un expert en animes et mangas qui valide les réponses des joueurs. Un joueur a proposé "${characterName}" pour le thème: "${theme}" (${themeEn}).
 
-⚠️ RÈGLES DE VALIDATION STRICTES:
+🎯 TA MISSION: Être JUSTE et ÉQUITABLE, pas trop strict!
 
-1. **Le personnage DOIT exister** dans un anime/manga connu
-   - Rejette les noms inventés, fantaisistes ou inexistants
-   - Rejette les noms de personnes réelles (sauf si ce sont des personnages d'anime biographiques)
-   - Rejette les noms génériques ("ninja", "samourai", "un personnage")
+✅ ACCEPTE SI:
+1. Le personnage existe vraiment dans un anime/manga
+2. Il correspond bien au thème demandé
+3. Même avec des fautes de frappe ou majuscules manquantes
+4. Même si c'est un surnom connu du personnage
 
-2. **Le personnage DOIT correspondre EXACTEMENT au thème**
-   - Vérifie que la caractéristique demandée est VRAIMENT présente
-   - Sois STRICT: "cheveux rouges" ≠ "cheveux oranges" ou "cheveux roses"
-   - Ne devine pas: si tu n'es pas SÛR à 80%+, rejette
+❌ REJETTE SEULEMENT SI:
+1. Le nom est complètement inventé ou n'existe pas
+2. Le personnage ne correspond PAS DU TOUT au thème
+3. C'est un nom trop générique ("ninja", "un samourai")
 
-3. **Tolérance sur les noms:**
-   - ✅ Accepte les variantes: "Naruto", "Naruto Uzumaki", "Uzumaki Naruto"
-   - ✅ Accepte les surnoms très connus: "Mugiwara" pour Luffy, "Pirate Hunter" pour Zoro
-   - ✅ Accepte les fautes mineures: "Sangoku" pour "Goku", "Natsu" pour "Natsu"
-   - ❌ Rejette les noms trop vagues ou incomplets
+💡 TOLÉRANCES:
+- ✅ Majuscules/minuscules: "naruto" = "Naruto" = "NARUTO"
+- ✅ Fautes mineures: "Sangoku" = "Goku", "Natsu" = "Natsu"
+- ✅ Accents oubliés: "Eren" = "Eren"
+- ✅ Surnoms: "Mugiwara" pour Luffy, "Roi des Pirates" pour Roger
+- ✅ Noms incomplets mais clairs: "Zoro" pour "Roronoa Zoro"
+- ✅ Ordre prénom/nom: "Naruto Uzumaki" = "Uzumaki Naruto"
 
-4. **Confidence (0-1):**
-   - 0.9-1.0 = Tu es absolument certain
-   - 0.7-0.89 = Très probable mais pas 100% sûr
-   - 0.5-0.69 = Pas assez sûr → REJETTE (valid: false)
-   - 0-0.49 = Clairement faux → REJETTE
+🎲 CONFIDENCE (0-1):
+- 0.9-1.0 = Tu es sûr à 90%+
+- 0.7-0.89 = Probable à 70-89%
+- 0.5-0.69 = Pas sûr (50-69%)
+- 0-0.49 = Probablement faux
 
-⚠️ EN CAS DE DOUTE, REJETTE! Il vaut mieux rejeter une bonne réponse que d'accepter une mauvaise.
+⚠️ IMPORTANT: Sois GÉNÉREUX! Si tu penses que c'est probablement bon, ACCEPTE avec confidence > 0.7
 
-Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans \`\`\`json):
+Réponds en JSON (sans markdown):
 {
   "valid": true ou false,
   "confidence": nombre entre 0 et 1,
-  "reason": "Explication courte et précise en français"
+  "reason": "Courte explication"
 }
 
 Exemples:
-✅ Thème "cheveux rouges" + "Shanks" → {"valid": true, "confidence": 0.95, "reason": "Shanks (One Piece) a les cheveux rouges"}
-❌ Thème "cheveux rouges" + "Goku" → {"valid": false, "confidence": 0.95, "reason": "Goku a les cheveux noirs, pas rouges"}
-❌ Thème "sabreurs" + "ninja" → {"valid": false, "confidence": 0.9, "reason": "Nom trop générique, pas un personnage spécifique"}
-✅ Thème "utilisateurs de feu" + "Natsu" → {"valid": true, "confidence": 0.98, "reason": "Natsu Dragneel (Fairy Tail) maîtrise la magie de feu"}
-❌ Thème "personnages blonds" + "Luffy" → {"valid": false, "confidence": 0.95, "reason": "Luffy a les cheveux noirs, pas blonds"}`;
+✅ "cheveux rouges" + "shanks" → {"valid": true, "confidence": 0.95, "reason": "Shanks (One Piece) a les cheveux rouges"}
+✅ "cheveux rouges" + "SHANKS" → {"valid": true, "confidence": 0.95, "reason": "Shanks (One Piece) a les cheveux rouges"}
+✅ "sabreurs" + "zoro" → {"valid": true, "confidence": 0.98, "reason": "Zoro est un sabreur légendaire"}
+❌ "cheveux rouges" + "goku" → {"valid": false, "confidence": 0.95, "reason": "Goku a les cheveux noirs"}
+❌ "sabreurs" + "ninja" → {"valid": false, "confidence": 0.9, "reason": "Trop générique"}
+✅ "utilisateurs de feu" + "ace" → {"valid": true, "confidence": 0.95, "reason": "Ace utilise le Mera Mera no Mi (feu)"}`;
+
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -69,9 +74,9 @@ Exemples:
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.1, // Très bas pour des réponses cohérentes et strictes
-          topK: 10,
-          topP: 0.7,
+          temperature: 0.2, // Équilibré entre cohérence et tolérance
+          topK: 20,
+          topP: 0.8,
           maxOutputTokens: 256,
         },
       }),
@@ -94,9 +99,9 @@ Exemples:
 
     const parsed = JSON.parse(cleanedText);
 
-    // Appliquer un seuil de confidence strict
+    // Appliquer un seuil de confidence équilibré
     const confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;
-    const isValid = parsed.valid === true && confidence >= 0.7; // Minimum 70% de confiance
+    const isValid = parsed.valid === true && confidence >= 0.6; // Minimum 60% de confiance (équilibré)
 
     return NextResponse.json({
       valid: isValid,
