@@ -553,9 +553,6 @@ export async function advanceToNextTheme(roomId: string): Promise<void> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Soumettre une réponse (personnage)
- */
-export /**
  * Soumettre une réponse (acceptée localement, validation à la fin du thème)
  */
 export async function submitCharacterAnswer(
