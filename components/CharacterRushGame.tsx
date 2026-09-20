@@ -39,6 +39,8 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
   const [characterInput, setCharacterInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [lastCompletedThemeId, setLastCompletedThemeId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Timer
@@ -52,14 +54,24 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
 
       // Auto advance when time is up
       if (remaining <= 0 && room.state === 'playing') {
+        // Afficher l'écran de résultats avant de passer au thème suivant
+        const currentTheme = room.themes[room.currentThemeIndex];
+        if (currentTheme && currentTheme.id !== lastCompletedThemeId) {
+          setShowResults(true);
+          setLastCompletedThemeId(currentTheme.id);
+        }
+        
         if (room.hostId === user.uid) {
-          advanceToNextTheme(room.id);
+          // Laisser 3 secondes pour voir les résultats avant d'avancer
+          setTimeout(() => {
+            advanceToNextTheme(room.id);
+          }, 3000);
         }
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [room, user.uid]);
+  }, [room, user.uid, lastCompletedThemeId]);
 
   // Subscribe to room
   useEffect(() => {
@@ -76,7 +88,7 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
 
   // Focus input when theme changes OR when game starts
   useEffect(() => {
-    if (room && inputRef.current) {
+    if (room && inputRef.current && !showResults) {
       // Délai plus long pour mobile
       setTimeout(() => {
         if (inputRef.current) {
@@ -88,11 +100,11 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
         }
       }, 150);
     }
-  }, [room?.currentThemeIndex, room?.themeStartTime]); // Trigger sur changement de thème ET start time
+  }, [room?.currentThemeIndex, room?.themeStartTime, showResults]); // Trigger sur changement de thème ET start time
 
   // Focus au montage initial (début de partie)
   useEffect(() => {
-    if (room && inputRef.current) {
+    if (room && inputRef.current && !showResults) {
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
@@ -102,7 +114,14 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
         }
       }, 200);
     }
-  }, []); // Une seule fois au montage
+  }, [showResults]); // Une seule fois au montage
+
+  // Cacher l'écran de résultats quand un nouveau thème commence
+  useEffect(() => {
+    if (room && room.themeStartTime && timeLeft > 0) {
+      setShowResults(false);
+    }
+  }, [room?.themeStartTime, timeLeft]);
 
   if (!room) {
     return (
@@ -163,6 +182,163 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
 
   const progressPercent = ((room.currentThemeIndex + 1) / room.totalThemes) * 100;
   const timerPercent = room.timerPerTheme > 0 ? (timeLeft / room.timerPerTheme) * 100 : 0;
+
+  // Écran de résultats détaillés
+  if (showResults && timeLeft === 0) {
+    const validAnswers = myAnswers.filter((a) => a.validationStatus === 'valid');
+    const invalidAnswers = myAnswers.filter((a) => a.validationStatus === 'invalid');
+    const pendingAnswers = myAnswers.filter((a) => a.validationStatus === 'pending');
+
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-6 animate-fade-in">
+        <Panel glow="magenta" className="p-6">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-display font-black text-white mb-2">
+              Résultats - {currentTheme?.theme}
+            </h2>
+            <p className="text-sm text-slate-400">
+              Thème {room.currentThemeIndex + 1}/{room.totalThemes}
+            </p>
+          </div>
+
+          {/* Statistiques */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <span className="text-2xl font-display font-black text-emerald-400">
+                  {validAnswers.length}
+                </span>
+              </div>
+              <p className="text-xs text-center text-emerald-300">Valides</p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-red-950/40 border border-red-800/40">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <XCircle className="w-5 h-5 text-red-400" />
+                <span className="text-2xl font-display font-black text-red-400">
+                  {invalidAnswers.length}
+                </span>
+              </div>
+              <p className="text-xs text-center text-red-300">Invalides</p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-800/40">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Loader className="w-5 h-5 text-amber-400" />
+                <span className="text-2xl font-display font-black text-amber-400">
+                  {pendingAnswers.length}
+                </span>
+              </div>
+              <p className="text-xs text-center text-amber-300">En attente</p>
+            </div>
+          </div>
+
+          {/* Liste détaillée */}
+          <div className="space-y-3 max-h-[500px] overflow-y-auto">
+            {myAnswers.length === 0 ? (
+              <p className="text-center text-slate-500 py-8">
+                Aucune réponse soumise pour ce thème
+              </p>
+            ) : (
+              <>
+                {/* Réponses valides */}
+                {validAnswers.map((answer, index) => (
+                  <div
+                    key={`valid-${index}`}
+                    className="p-4 rounded-lg bg-emerald-950/40 border border-emerald-800/40 animate-fade-in"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <span className="font-bold text-white">
+                          {answer.characterName}
+                        </span>
+                      </div>
+                      {answer.confidence !== undefined && (
+                        <span className="text-xs text-emerald-300 shrink-0">
+                          {Math.round(answer.confidence * 100)}% sûr
+                        </span>
+                      )}
+                    </div>
+                    {answer.reason && (
+                      <p className="text-sm text-emerald-200 mb-1 pl-7">
+                        {answer.reason}
+                      </p>
+                    )}
+                    {answer.details && (
+                      <p className="text-xs text-emerald-300/80 pl-7">
+                        {answer.details}
+                      </p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Réponses invalides */}
+                {invalidAnswers.map((answer, index) => (
+                  <div
+                    key={`invalid-${index}`}
+                    className="p-4 rounded-lg bg-red-950/40 border border-red-800/40 animate-fade-in"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <XCircle className="w-5 h-5 text-red-400 shrink-0" />
+                        <span className="font-bold text-white">
+                          {answer.characterName}
+                        </span>
+                      </div>
+                      {answer.confidence !== undefined && (
+                        <span className="text-xs text-red-300 shrink-0">
+                          {Math.round(answer.confidence * 100)}% sûr
+                        </span>
+                      )}
+                    </div>
+                    {answer.reason && (
+                      <p className="text-sm text-red-200 mb-1 pl-7">
+                        {answer.reason}
+                      </p>
+                    )}
+                    {answer.details && (
+                      <p className="text-xs text-red-300/80 pl-7">
+                        {answer.details}
+                      </p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Réponses en attente */}
+                {pendingAnswers.map((answer, index) => (
+                  <div
+                    key={`pending-${index}`}
+                    className="p-4 rounded-lg bg-amber-950/40 border border-amber-800/40 animate-fade-in"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Loader className="w-5 h-5 text-amber-400 shrink-0 animate-spin" />
+                      <span className="font-bold text-white">
+                        {answer.characterName}
+                      </span>
+                    </div>
+                    <p className="text-sm text-amber-200 pl-7 mt-1">
+                      Validation en cours...
+                    </p>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+          {/* Message de transition */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-slate-400">
+              {room.currentThemeIndex + 1 < room.totalThemes
+                ? '🔄 Prochain thème dans quelques secondes...'
+                : '🎉 Calcul des scores finaux...'}
+            </p>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 animate-fade-in">
