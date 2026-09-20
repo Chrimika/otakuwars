@@ -21,26 +21,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Tu es un expert en animes et mangas. Un joueur a proposé le personnage "${characterName}" pour le thème: "${theme}" (${themeEn}).
+    const prompt = `Tu es un expert STRICT en animes et mangas. Un joueur a proposé le personnage "${characterName}" pour le thème: "${theme}" (${themeEn}).
 
-RÈGLES DE VALIDATION:
-- Le personnage doit être un personnage d'anime/manga connu
-- Le personnage doit correspondre clairement au thème
-- Sois tolérant avec les variantes de noms (ex: "Naruto", "Naruto Uzumaki", "Uzumaki Naruto")
-- Accepte les surnoms courants (ex: "Mugiwara" pour Luffy, "Pirate Hunter" pour Zoro)
-- Rejette les personnages qui ne correspondent PAS au thème
-- Rejette les noms inventés ou les noms de personnes réelles
+⚠️ RÈGLES DE VALIDATION STRICTES:
+
+1. **Le personnage DOIT exister** dans un anime/manga connu
+   - Rejette les noms inventés, fantaisistes ou inexistants
+   - Rejette les noms de personnes réelles (sauf si ce sont des personnages d'anime biographiques)
+   - Rejette les noms génériques ("ninja", "samourai", "un personnage")
+
+2. **Le personnage DOIT correspondre EXACTEMENT au thème**
+   - Vérifie que la caractéristique demandée est VRAIMENT présente
+   - Sois STRICT: "cheveux rouges" ≠ "cheveux oranges" ou "cheveux roses"
+   - Ne devine pas: si tu n'es pas SÛR à 80%+, rejette
+
+3. **Tolérance sur les noms:**
+   - ✅ Accepte les variantes: "Naruto", "Naruto Uzumaki", "Uzumaki Naruto"
+   - ✅ Accepte les surnoms très connus: "Mugiwara" pour Luffy, "Pirate Hunter" pour Zoro
+   - ✅ Accepte les fautes mineures: "Sangoku" pour "Goku", "Natsu" pour "Natsu"
+   - ❌ Rejette les noms trop vagues ou incomplets
+
+4. **Confidence (0-1):**
+   - 0.9-1.0 = Tu es absolument certain
+   - 0.7-0.89 = Très probable mais pas 100% sûr
+   - 0.5-0.69 = Pas assez sûr → REJETTE (valid: false)
+   - 0-0.49 = Clairement faux → REJETTE
+
+⚠️ EN CAS DE DOUTE, REJETTE! Il vaut mieux rejeter une bonne réponse que d'accepter une mauvaise.
 
 Réponds UNIQUEMENT avec un JSON valide (sans markdown, sans \`\`\`json):
 {
   "valid": true ou false,
   "confidence": nombre entre 0 et 1,
-  "reason": "Courte explication en français"
+  "reason": "Explication courte et précise en français"
 }
 
 Exemples:
-- Si le thème est "cheveux rouges" et le personnage est "Shanks": {"valid": true, "confidence": 0.95, "reason": "Shanks a les cheveux rouges"}
-- Si le thème est "cheveux rouges" et le personnage est "Goku": {"valid": false, "confidence": 0.9, "reason": "Goku a les cheveux noirs"}`;
+✅ Thème "cheveux rouges" + "Shanks" → {"valid": true, "confidence": 0.95, "reason": "Shanks (One Piece) a les cheveux rouges"}
+❌ Thème "cheveux rouges" + "Goku" → {"valid": false, "confidence": 0.95, "reason": "Goku a les cheveux noirs, pas rouges"}
+❌ Thème "sabreurs" + "ninja" → {"valid": false, "confidence": 0.9, "reason": "Nom trop générique, pas un personnage spécifique"}
+✅ Thème "utilisateurs de feu" + "Natsu" → {"valid": true, "confidence": 0.98, "reason": "Natsu Dragneel (Fairy Tail) maîtrise la magie de feu"}
+❌ Thème "personnages blonds" + "Luffy" → {"valid": false, "confidence": 0.95, "reason": "Luffy a les cheveux noirs, pas blonds"}`;
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -48,9 +69,9 @@ Exemples:
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.3,
-          topK: 20,
-          topP: 0.8,
+          temperature: 0.1, // Très bas pour des réponses cohérentes et strictes
+          topK: 10,
+          topP: 0.7,
           maxOutputTokens: 256,
         },
       }),
@@ -73,18 +94,23 @@ Exemples:
 
     const parsed = JSON.parse(cleanedText);
 
+    // Appliquer un seuil de confidence strict
+    const confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;
+    const isValid = parsed.valid === true && confidence >= 0.7; // Minimum 70% de confiance
+
     return NextResponse.json({
-      valid: parsed.valid === true,
-      confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
+      valid: isValid,
+      confidence: confidence,
       reason: parsed.reason || '',
     });
   } catch (error) {
     console.error('Error validating character:', error);
-    // En cas d'erreur, accepter par défaut (mode permissif)
+    // En cas d'erreur, REJETER par défaut (mode strict)
+    // Il vaut mieux perdre un point que d'en donner un injustement
     return NextResponse.json({
-      valid: true,
-      confidence: 0.5,
-      reason: 'Validation automatique (erreur API)',
+      valid: false,
+      confidence: 0.3,
+      reason: 'Erreur de validation - réponse rejetée par sécurité',
     });
   }
 }
