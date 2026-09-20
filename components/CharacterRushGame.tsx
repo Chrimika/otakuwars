@@ -77,7 +77,7 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
   // Focus input when theme changes OR when game starts
   useEffect(() => {
     if (room && inputRef.current) {
-      // Petit délai pour s'assurer que le DOM est prêt
+      // Délai plus long pour mobile
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
@@ -86,9 +86,23 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
             inputRef.current.click();
           }
         }
-      }, 100);
+      }, 150);
     }
   }, [room?.currentThemeIndex, room?.themeStartTime]); // Trigger sur changement de thème ET start time
+
+  // Focus au montage initial (début de partie)
+  useEffect(() => {
+    if (room && inputRef.current) {
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            inputRef.current.click();
+          }
+        }
+      }, 200);
+    }
+  }, []); // Une seule fois au montage
 
   if (!room) {
     return (
@@ -131,8 +145,11 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
         if (inputRef.current) {
           inputRef.current.focus();
           // Pour iOS: trigger le clavier virtuel
-          inputRef.current.click();
+          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            inputRef.current.click();
+          }
         }
+      }, 10);
       }, 10);
     }
   };
@@ -231,6 +248,7 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
                   disabled={timeLeft === 0 || isSubmitting}
                   className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white/5 border border-white/10 text-white text-base placeholder-slate-600 focus:border-neon-magenta focus:outline-none transition-colors disabled:opacity-50"
                   autoComplete="off"
+                  autoFocus
                 />
                 <button
                   type="submit"
