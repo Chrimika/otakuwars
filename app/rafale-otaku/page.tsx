@@ -13,6 +13,7 @@ import {
   subscribeToCharacterRushRooms,
   joinCharacterRushRoom as joinCharacterRushRoomService,
   recordCharacterRushResults,
+  resetCharacterRushRoom,
 } from '../../lib/characterRushService';
 import { NeonButton } from '../../components/ui/NeonButton';
 import { Panel } from '../../components/ui/Panel';
@@ -314,7 +315,11 @@ function RafaleOtakuContent() {
         <CharacterRushLeaderboard
           room={activeRoom}
           user={user}
-          onRematch={() => handleRoomCreated(activeRoom)}
+          onRematch={async () => {
+            // Réinitialiser la room pour régénérer de nouveaux thèmes
+            await resetCharacterRushRoom(activeRoom.id);
+            setViewState('lobby');
+          }}
           onHome={handleLeaveRoom}
           onUpdateUser={setUser}
         />

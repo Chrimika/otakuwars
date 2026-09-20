@@ -221,6 +221,43 @@ export async function joinCharacterRushRoom(
 }
 
 /**
+ * Réinitialiser un salon pour une nouvelle partie (régénère les thèmes)
+ */
+export async function resetCharacterRushRoom(roomId: string): Promise<void> {
+  const db = getRequiredDb();
+  const roomRef = doc(db, 'characterRushRooms', roomId);
+  const roomSnap = await getDoc(roomRef);
+
+  if (!roomSnap.exists()) {
+    throw new Error('Salon introuvable');
+  }
+
+  const room = roomSnap.data() as CharacterRushRoom;
+
+  // Réinitialiser tous les joueurs
+  const resetPlayers: Record<string, CharacterRushPlayer> = {};
+  Object.entries(room.players || {}).forEach(([uid, player]) => {
+    resetPlayers[uid] = {
+      ...player,
+      ready: false,
+      answers: [],
+      score: 0,
+    };
+  });
+
+  // Réinitialiser la room
+  await updateDoc(roomRef, {
+    state: 'waiting',
+    players: resetPlayers,
+    themes: [],
+    currentThemeIndex: 0,
+    themeStartTime: null,
+    isGeneratingThemes: false,
+    updatedAt: Date.now(),
+  });
+}
+
+/**
  * Quitter un salon
  */
 export async function leaveCharacterRushRoom(roomId: string, userId: string): Promise<void> {
