@@ -43,13 +43,18 @@ export const CharacterRushLeaderboard: React.FC<CharacterRushLeaderboardProps> =
 }) => {
   const [leaderboard, setLeaderboard] = useState<CharacterRushScoreSummary[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<CharacterRushScoreSummary | null>(null);
+  const [celebrationDone, setCelebrationDone] = useState(false);
 
   useEffect(() => {
-    soundFx.playVictory();
-    try {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    } catch {
-      /* ignore */
+    // Jouer la célébration une seule fois
+    if (!celebrationDone) {
+      soundFx.playVictory();
+      try {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } catch {
+        /* ignore */
+      }
+      setCelebrationDone(true);
     }
 
     const scores = calculateCharacterRushLeaderboard(room);
@@ -65,7 +70,7 @@ export const CharacterRushLeaderboard: React.FC<CharacterRushLeaderboardProps> =
     // Auto-select current user
     const myScore = scores.find((s) => s.uid === user.uid);
     if (myScore) setSelectedPlayer(myScore);
-  }, [room, user, onUpdateUser]);
+  }, [room.id]); // Trigger seulement sur changement de room.id
 
   const handlePlayerClick = (player: CharacterRushScoreSummary) => {
     setSelectedPlayer(player);

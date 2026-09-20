@@ -74,12 +74,21 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
     return unsub;
   }, [roomId, onGameOver]);
 
-  // Focus input when theme changes
+  // Focus input when theme changes OR when game starts
   useEffect(() => {
     if (room && inputRef.current) {
-      inputRef.current.focus();
+      // Petit délai pour s'assurer que le DOM est prêt
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          // Pour iOS: s'assurer que le clavier s'ouvre
+          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+            inputRef.current.click();
+          }
+        }
+      }, 100);
     }
-  }, [room?.currentThemeIndex]);
+  }, [room?.currentThemeIndex, room?.themeStartTime]); // Trigger sur changement de thème ET start time
 
   if (!room) {
     return (
