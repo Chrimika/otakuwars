@@ -67,6 +67,45 @@ Réponds en JSON sans markdown:
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('❌ Gemini error:', response.status, errorData);
+      
+      // Si 503 (surchargé), on réessaye après 2 secondes
+      if (response.status === 503) {
+        console.log('⏳ Modèle surchargé, on réessaye dans 2s...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Deuxième tentative
+        const retryResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.95,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 3072,
+            },
+          }),
+        });
+        
+        if (!retryResponse.ok) {
+          throw new Error(`Gemini API error after retry: ${retryResponse.status}`);
+        }
+        
+        const retryData = await retryResponse.json();
+        const retryContent = retryData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        let cleanedRetry = retryContent.trim();
+        if (cleanedRetry.startsWith('```json')) {
+          cleanedRetry = cleanedRetry.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (cleanedRetry.startsWith('```')) {
+          cleanedRetry = cleanedRetry.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        const parsedRetry = JSON.parse(cleanedRetry);
+        const allThemesRetry = parsedRetry.themes || [];
+        const shuffledRetry = allThemesRetry.sort(() => Math.random() - 0.5);
+        return NextResponse.json({ themes: shuffledRetry.slice(0, count) });
+      }
+      
       throw new Error(`Gemini API error: ${response.status}`);
     }
 
