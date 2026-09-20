@@ -108,25 +108,8 @@ function HomeContent() {
               </h1>
 
               <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed mb-8">
-                Affrontez d&apos;autres passionnés d&apos;animes en temps réel. Compte à rebours, score de vitesse, classement final.
+                Deux modes de jeu épiques pour tester vos connaissances otaku !
               </p>
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <NeonButton
-                  variant="primary"
-                  onClick={() => requireAuth(user, () => setIsCreateRoomOpen(true), goToAuth)}
-                >
-                  <KatanaIcon className="w-4 h-4" />
-                  Créer un salon
-                </NeonButton>
-                <NeonButton
-                  variant="secondary"
-                  onClick={() => requireAuth(user, () => setIsJoinRoomOpen(true), goToAuth)}
-                >
-                  <KeyRound className="w-4 h-4" />
-                  Rejoindre avec un code
-                </NeonButton>
-              </div>
 
               {(user?.isGuest) && (
                 <p className="mt-4 text-xs text-slate-500">
@@ -140,7 +123,130 @@ function HomeContent() {
           </div>
           <div className="torn-edge" />
 
-          <div className="max-w-6xl mx-auto px-4 pt-12 pb-12 sm:pb-20">
+          {/* Section Choix du Mode de Jeu */}
+          <div className="max-w-6xl mx-auto px-4 pt-12 pb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-display font-black text-white mb-2">
+                Choisissez votre mode de jeu
+              </h2>
+              <p className="text-sm text-slate-400">
+                Deux façons de prouver vos connaissances otaku !
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              {/* Mode Quiz Classique */}
+              <Panel glow="crimson" className="p-6 sm:p-8 group hover:scale-[1.02] transition-transform">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 clip-corner-sm bg-crimson/20 border border-crimson/40 flex items-center justify-center">
+                    <ImpactBurstIcon className="w-6 h-6 text-crimson" />
+                  </div>
+                  <span className="px-2 py-1 text-[10px] font-hud font-bold uppercase tracking-wider text-crimson bg-crimson/10 border border-crimson/30 rounded">
+                    Classique
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-display font-black text-white mb-2">
+                  Quiz Multijoueur
+                </h3>
+                
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                  Questions à choix multiples avec compte à rebours. Répondez le plus vite possible pour maximiser vos points !
+                </p>
+
+                <div className="space-y-2 mb-6">
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Clock className="w-4 h-4 text-crimson shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Durée:</strong> 5-30 secondes par question (réglable)</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Users className="w-4 h-4 text-crimson shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Joueurs:</strong> 2-10 joueurs en temps réel</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Trophy className="w-4 h-4 text-crimson shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Score:</strong> Points bonus pour rapidité + précision</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <NeonButton
+                    variant="primary"
+                    onClick={() => requireAuth(user, () => setIsCreateRoomOpen(true), goToAuth)}
+                    className="w-full"
+                  >
+                    <KatanaIcon className="w-4 h-4" />
+                    Créer un salon Quiz
+                  </NeonButton>
+                  <NeonButton
+                    variant="secondary"
+                    onClick={() => requireAuth(user, () => setIsJoinRoomOpen(true), goToAuth)}
+                    className="w-full"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    Rejoindre avec un code
+                  </NeonButton>
+                </div>
+              </Panel>
+
+              {/* Mode Rafale Otaku */}
+              <Panel glow="magenta" className="p-6 sm:p-8 group hover:scale-[1.02] transition-transform relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-neon-magenta/10 rounded-full blur-3xl -z-10" />
+                
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 clip-corner-sm bg-neon-magenta/20 border border-neon-magenta/40 flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-neon-magenta animate-pulse" />
+                  </div>
+                  <span className="px-2 py-1 text-[10px] font-hud font-bold uppercase tracking-wider text-neon-magenta bg-neon-magenta/10 border border-neon-magenta/30 rounded">
+                    Nouveau!
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-display font-black text-white mb-2">
+                  Rafale Otaku
+                </h3>
+                
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                  Citez un maximum de personnages d&apos;anime correspondant au thème ! L&apos;IA génère les défis et valide vos réponses.
+                </p>
+
+                <div className="space-y-2 mb-6">
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Zap className="w-4 h-4 text-neon-magenta shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Durée:</strong> 15 secondes par thème (20 thèmes)</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Users className="w-4 h-4 text-neon-magenta shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Joueurs:</strong> 2-6 joueurs simultanés</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Trophy className="w-4 h-4 text-neon-magenta shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Score:</strong> 1 point par personnage valide</span>
+                  </div>
+                </div>
+
+                <NeonButton
+                  variant="primary"
+                  onClick={() => router.push('/rafale-otaku')}
+                  className="w-full bg-neon-magenta! border-neon-magenta!"
+                >
+                  <Zap className="w-4 h-4" />
+                  Jouer à Rafale Otaku
+                </NeonButton>
+              </Panel>
+            </div>
+
+            {(user?.isGuest) && (
+              <p className="text-center text-xs text-slate-500">
+                <button onClick={goToAuth} className="text-crimson underline underline-offset-2 cursor-pointer">
+                  Connectez-vous
+                </button>
+                {' '}pour créer ou rejoindre un salon.
+              </p>
+            )}
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 pt-8 pb-12 sm:pb-20">
 
             {/* Live rooms */}
             <section className="mb-20">
@@ -199,55 +305,6 @@ function HomeContent() {
                   })}
                 </div>
               )}
-            </section>
-
-            {/* Nouveau mode - Rafale Otaku */}
-            <section className="mb-20">
-              <Panel glow="magenta" className="p-6 sm:p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-neon-magenta/10 rounded-full blur-3xl -z-10" />
-                <div className="grid md:grid-cols-[1fr,auto] gap-6 items-center">
-                  <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 clip-corner-sm bg-neon-magenta/20 border border-neon-magenta/40 text-neon-magenta text-xs font-hud font-bold uppercase tracking-wider mb-3">
-                      <Zap className="w-3.5 h-3.5" />
-                      Nouveau mode de jeu
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl font-display font-black text-white mb-2">
-                      Rafale Otaku
-                    </h2>
-                    <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                      Un thème, 15 secondes, citez un maximum de personnages d&apos;anime ! 
-                      L&apos;IA Gemini génère des défis créatifs et valide vos réponses en temps réel.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1.5 rounded-lg">
-                        <Zap className="w-3.5 h-3.5 text-neon-magenta" />
-                        Thèmes générés par IA
-                      </span>
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1.5 rounded-lg">
-                        <Clock className="w-3.5 h-3.5 text-neon-gold" />
-                        Validation instantanée
-                      </span>
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1.5 rounded-lg">
-                        <Users className="w-3.5 h-3.5 text-neon-violet" />
-                        Multijoueur
-                      </span>
-                    </div>
-                    <NeonButton 
-                      variant="primary" 
-                      onClick={() => router.push('/rafale-otaku')}
-                      className="bg-neon-magenta! border-neon-magenta!"
-                    >
-                      <Zap className="w-4 h-4" />
-                      Découvrir Rafale Otaku
-                    </NeonButton>
-                  </div>
-                  <div className="hidden md:block">
-                    <div className="clip-corner-sm w-32 h-32 bg-neon-magenta/20 border-2 border-neon-magenta/40 flex items-center justify-center">
-                      <Zap className="w-16 h-16 text-neon-magenta animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-              </Panel>
             </section>
 
             {/* Avatars */}
