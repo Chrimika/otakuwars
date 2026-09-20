@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent';
+const AI_API_KEY = process.env.AI_API_KEY || '';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export async function POST(request: NextRequest) {
   try {
     const { characterName, theme, themeEn } = await request.json();
 
-    if (!GEMINI_API_KEY) {
+    if (!AI_API_KEY) {
       return NextResponse.json(
-        { error: 'Gemini API key not configured' },
+        { error: 'AI API key not configured' },
         { status: 500 }
       );
     }
@@ -41,69 +41,50 @@ EXEMPLES:
 - "capable de voler" + "hawks" = valid true confidence 0.95
 - "cheveux rouges" + "goku" = valid false confidence 0.9
 
-IMPORTANT: Réponds UNIQUEMENT avec ce JSON exact (pas de texte avant ou après):
-{"valid":true,"confidence":0.95,"reason":"courte explication"}
-
-OU
-
-{"valid":false,"confidence":0.9,"reason":"courte explication"}`;
+Réponds UNIQUEMENT avec ce JSON exact:
+{"valid":true,"confidence":0.95,"reason":"courte explication"}`;
 
 
 
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(GROQ_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AI_API_KEY}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.3, // Plus de tolérance
-          topK: 30,
-          topP: 0.9,
-          maxOutputTokens: 256,
-          responseMimeType: 'application/json', // Force JSON output
-        },
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un expert en animes. Réponds toujours en JSON valide.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 256,
+        response_format: { type: 'json_object' },
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const textContent = data.choices?.[0]?.message?.content || '';
 
-    console.log('🔍 Gemini raw response:', textContent);
-
-    // Nettoyer la réponse
-    let cleanedText = textContent.trim();
-    
-    // Supprimer markdown
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    
-    // Supprimer tout texte avant le premier {
-    const jsonStart = cleanedText.indexOf('{');
-    if (jsonStart > 0) {
-      cleanedText = cleanedText.substring(jsonStart);
-    }
-    
-    // Supprimer tout texte après le dernier }
-    const jsonEnd = cleanedText.lastIndexOf('}');
-    if (jsonEnd > 0) {
-      cleanedText = cleanedText.substring(0, jsonEnd + 1);
-    }
-
-    console.log('🔍 Cleaned text:', cleanedText);
+    console.log('🔍 Groq raw response:', textContent);
 
     let parsed;
     try {
-      parsed = JSON.parse(cleanedText);
+      parsed = JSON.parse(textContent);
     } catch (parseError) {
-      console.error('❌ JSON parse error:', parseError, 'Text:', cleanedText);
-      // Si parse échoue, accepter par défaut (mode permissif)
+      console.error('❌ JSON parse error:', parseError, 'Text:', textContent);
+      // Si parse échoue, accepter par défaut
       return NextResponse.json({
         valid: true,
         confidence: 0.6,

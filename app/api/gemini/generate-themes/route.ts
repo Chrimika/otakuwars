@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent';
+const AI_API_KEY = process.env.AI_API_KEY || '';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export async function POST(request: NextRequest) {
   try {
     const { count = 20 } = await request.json();
 
-    if (!GEMINI_API_KEY) {
+    if (!AI_API_KEY) {
       return NextResponse.json(
-        { error: 'Gemini API key not configured' },
+        { error: 'AI API key not configured' },
         { status: 500 }
       );
     }
 
-    // Générer BEAUCOUP plus de thèmes que demandé pour avoir de la variété
-    const generateCount = Math.max(count * 2, 40); // Au moins 40 thèmes
+    // Générer plus de thèmes pour avoir de la variété
+    const generateCount = Math.max(count * 2, 40);
     
-    // Randomisation pour varier les thèmes
+    // Randomisation
     const randomSeed = Math.floor(Math.random() * 999999);
     const timestamp = Date.now();
 
@@ -45,82 +45,47 @@ Exemples créatifs:
 - Ceux qui mangent énormément
 - Génies ou stratèges brillants
 
-Réponds en JSON sans markdown:
+Réponds en JSON:
 {"themes": [{"theme": "Description française", "themeEn": "English description"}, ...]}`;
 
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(GROQ_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AI_API_KEY}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.95, // Haute créativité mais stable
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 3072, // Suffisant pour 40 thèmes
-        },
+        model: 'llama-3.3-70b-versatile', // Modèle gratuit et puissant
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un expert en animes et mangas. Réponds toujours en JSON valide.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.9,
+        max_tokens: 4000,
+        response_format: { type: 'json_object' }, // Force JSON
       }),
     });
 
-    console.log('🌐 Gemini response status:', response.status);
+    console.log('🌐 Groq response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Gemini error:', response.status, errorData);
-      
-      // Si 503 (surchargé), on réessaye après 2 secondes
-      if (response.status === 503) {
-        console.log('⏳ Modèle surchargé, on réessaye dans 2s...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Deuxième tentative
-        const retryResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.95,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 3072,
-            },
-          }),
-        });
-        
-        if (!retryResponse.ok) {
-          throw new Error(`Gemini API error after retry: ${retryResponse.status}`);
-        }
-        
-        const retryData = await retryResponse.json();
-        const retryContent = retryData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        let cleanedRetry = retryContent.trim();
-        if (cleanedRetry.startsWith('```json')) {
-          cleanedRetry = cleanedRetry.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-        } else if (cleanedRetry.startsWith('```')) {
-          cleanedRetry = cleanedRetry.replace(/^```\s*/, '').replace(/\s*```$/, '');
-        }
-        const parsedRetry = JSON.parse(cleanedRetry);
-        const allThemesRetry = parsedRetry.themes || [];
-        const shuffledRetry = allThemesRetry.sort(() => Math.random() - 0.5);
-        return NextResponse.json({ themes: shuffledRetry.slice(0, count) });
-      }
-      
-      throw new Error(`Gemini API error: ${response.status}`);
+      console.error('❌ Groq error:', response.status, errorData);
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const textContent = data.choices?.[0]?.message?.content || '';
 
-    // Nettoyer la réponse
-    let cleanedText = textContent.trim();
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
+    console.log('✅ Groq response received, parsing JSON...');
 
-    const parsed = JSON.parse(cleanedText);
+    const parsed = JSON.parse(textContent);
     const allThemes = parsed.themes || [];
 
     // MÉLANGER ALÉATOIREMENT et prendre seulement le nombre demandé
