@@ -373,9 +373,9 @@ export async function startCharacterRushGame(roomId: string): Promise<void> {
  * Passer au thème suivant
  */
 export /**
- * Valider toutes les réponses en batch pour un thème donné
+ * Valider TOUTES les réponses du jeu en une seule fois (à la toute fin)
  */
-async function validateThemeAnswersBatch(roomId: string, themeId: string): Promise<void> {
+async function validateAllGameAnswersBatch(roomId: string): Promise<void> {
   const db = getRequiredDb();
   const roomRef = doc(db, 'characterRushRooms', roomId);
   const roomSnap = await getDoc(roomRef);
@@ -383,28 +383,36 @@ async function validateThemeAnswersBatch(roomId: string, themeId: string): Promi
   if (!roomSnap.exists()) return;
 
   const room = roomSnap.data() as CharacterRushRoom;
-  const theme = room.themes.find(t => t.id === themeId);
-  if (!theme) return;
 
-  console.log(`🔍 Validation batch pour thème "${theme.theme}"...`);
+  console.log(`🔍 Validation FINALE de TOUTES les réponses du jeu...`);
 
-  // Collecter toutes les réponses de tous les joueurs pour ce thème
+  // Collecter TOUTES les réponses de TOUS les joueurs pour TOUS les thèmes
   const allAnswersToValidate: Array<{
     userId: string;
+    themeId: string;
     characterName: string;
+    theme: string;
+    themeEn: string;
     answerIndex: number;
   }> = [];
 
   Object.entries(room.players).forEach(([userId, player]) => {
-    const answers = player.answers[themeId] || [];
-    answers.forEach((answer, index) => {
-      if (answer.validationStatus === 'pending') {
-        allAnswersToValidate.push({
-          userId,
-          characterName: answer.characterName,
-          answerIndex: index,
-        });
-      }
+    Object.entries(player.answers).forEach(([themeId, answers]) => {
+      const theme = room.themes.find(t => t.id === themeId);
+      if (!theme) return;
+
+      answers.forEach((answer, index) => {
+        if (answer.validationStatus === 'pending') {
+          allAnswersToValidate.push({
+            userId,
+            themeId,
+            characterName: answer.characterName,
+            theme: theme.theme,
+            themeEn: theme.themeEn,
+            answerIndex: index,
+          });
+        }
+      });
     });
   });
 
@@ -413,17 +421,17 @@ async function validateThemeAnswersBatch(roomId: string, themeId: string): Promi
     return;
   }
 
-  console.log(`🔍 ${allAnswersToValidate.length} réponses à valider...`);
+  console.log(`🔍 ${allAnswersToValidate.length} réponses totales à valider...`);
 
-  // Préparer la requête batch
+  // Préparer la requête batch avec TOUTES les réponses
   const validationRequests = allAnswersToValidate.map(a => ({
     characterName: a.characterName,
-    theme: theme.theme,
-    themeEn: theme.themeEn,
+    theme: a.theme,
+    themeEn: a.themeEn,
   }));
 
   try {
-    // Appeler l'API de validation batch
+    // Appeler l'API de validation batch UNE SEULE FOIS
     const response = await fetch('/api/groq/validate-batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -442,54 +450,69 @@ async function validateThemeAnswersBatch(roomId: string, themeId: string): Promi
     // Mettre à jour toutes les réponses dans Firebase
     const updates: Record<string, any> = {};
     
+    // Grouper les updates par joueur et thème
+    const playerUpdates: Record<string, Record<string, any[]>> = {};
+    
     allAnswersToValidate.forEach((answerData, index) => {
       const result = results[index];
       if (!result) return;
 
-      const { userId, answerIndex } = answerData;
-      const player = room.players[userId];
-      const answers = [...(player.answers[themeId] || [])];
+      const { userId, themeId, answerIndex } = answerData;
       
+      if (!playerUpdates[userId]) playerUpdates[userId] = {};
+      if (!playerUpdates[userId][themeId]) {
+        playerUpdates[userId][themeId] = [...(room.players[userId].answers[themeId] || [])];
+      }
+      
+      const answers = playerUpdates[userId][themeId];
       if (answers[answerIndex]) {
         answers[answerIndex] = {
           ...answers[answerIndex],
           validationStatus: result.valid ? 'valid' : 'invalid',
           confidence: result.confidence,
           reason: result.reason,
-          details: result.details, // Nouveau champ avec détails
+          details: result.details,
         };
-
-        updates[`players.${userId}.answers.${themeId}`] = answers;
       }
     });
 
-    // Recalculer les scores
+    // Appliquer tous les updates
+    Object.entries(playerUpdates).forEach(([userId, themes]) => {
+      Object.entries(themes).forEach(([themeId, answers]) => {
+        updates[`players.${userId}.answers.${themeId}`] = answers;
+      });
+    });
+
+    // Recalculer les scores finaux
     Object.entries(room.players).forEach(([userId, player]) => {
       let totalValidAnswers = 0;
-      Object.values(player.answers).forEach((themeAnswers) => {
-        themeAnswers.forEach((answer) => {
+      
+      // Utiliser les nouvelles réponses si disponibles, sinon les anciennes
+      Object.entries(player.answers).forEach(([themeId, oldAnswers]) => {
+        const answers = playerUpdates[userId]?.[themeId] || oldAnswers;
+        answers.forEach((answer) => {
           if (answer.validationStatus === 'valid') {
             totalValidAnswers++;
           }
         });
       });
+      
       updates[`players.${userId}.score`] = totalValidAnswers;
     });
 
     updates.updatedAt = Date.now();
 
     await updateDoc(roomRef, updates);
-    console.log('✅ Firebase mis à jour avec les résultats');
+    console.log('✅ Firebase mis à jour avec TOUS les résultats finaux');
 
   } catch (error) {
-    console.error('❌ Erreur validation batch:', error);
-    // En cas d'erreur, on accepte toutes les réponses par défaut
+    console.error('❌ Erreur validation batch finale:', error);
+    // En cas d'erreur, accepter toutes les réponses
     const updates: Record<string, any> = {};
     
     allAnswersToValidate.forEach((answerData) => {
-      const { userId, answerIndex } = answerData;
-      const player = room.players[userId];
-      const answers = [...(player.answers[themeId] || [])];
+      const { userId, themeId, answerIndex } = answerData;
+      const answers = [...(room.players[userId].answers[themeId] || [])];
       
       if (answers[answerIndex]) {
         answers[answerIndex] = {
@@ -501,8 +524,13 @@ async function validateThemeAnswersBatch(roomId: string, themeId: string): Promi
         };
 
         updates[`players.${userId}.answers.${themeId}`] = answers;
-        updates[`players.${userId}.score`] = (room.players[userId].score || 0) + 1;
       }
+    });
+
+    // Recalculer scores avec réponses acceptées
+    Object.keys(room.players).forEach((userId) => {
+      const totalAnswers = allAnswersToValidate.filter(a => a.userId === userId).length;
+      updates[`players.${userId}.score`] = (room.players[userId].score || 0) + totalAnswers;
     });
 
     updates.updatedAt = Date.now();
@@ -511,7 +539,7 @@ async function validateThemeAnswersBatch(roomId: string, themeId: string): Promi
 }
 
 /**
- * Avancer au thème suivant (et valider les réponses du thème actuel)
+ * Avancer au thème suivant (SANS validation, juste passage au suivant)
  */
 export async function advanceToNextTheme(roomId: string): Promise<void> {
   const db = getRequiredDb();
@@ -521,24 +549,22 @@ export async function advanceToNextTheme(roomId: string): Promise<void> {
   if (!roomSnap.exists()) return;
 
   const room = roomSnap.data() as CharacterRushRoom;
-  const currentTheme = room.themes[room.currentThemeIndex];
-
-  // 🔥 VALIDER TOUTES LES RÉPONSES DU THÈME ACTUEL EN BATCH
-  if (currentTheme) {
-    await validateThemeAnswersBatch(roomId, currentTheme.id);
-  }
-
   const nextIndex = room.currentThemeIndex + 1;
 
   if (nextIndex >= room.themes.length) {
-    // Fin du jeu
+    // Fin du jeu - passer en game_over PUIS valider
     await updateDoc(roomRef, {
       state: 'game_over',
       themeStartTime: null,
       updatedAt: Date.now(),
     });
+
+    // 🔥 VALIDER TOUTES LES RÉPONSES DE TOUT LE JEU EN UNE SEULE FOIS
+    console.log('🎯 Fin du jeu! Lancement validation batch finale...');
+    await validateAllGameAnswersBatch(roomId);
+    
   } else {
-    // Thème suivant
+    // Thème suivant (PAS de validation ici!)
     await updateDoc(roomRef, {
       currentThemeIndex: nextIndex,
       themeStartTime: Date.now(),
