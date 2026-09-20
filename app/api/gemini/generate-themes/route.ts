@@ -55,7 +55,7 @@ Réponds en JSON:
         'Authorization': `Bearer ${AI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // Modèle gratuit et puissant
+        model: 'groq/compound', // Modèle gratuit et puissant
         messages: [
           {
             role: 'system',

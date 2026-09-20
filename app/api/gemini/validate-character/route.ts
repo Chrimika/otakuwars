@@ -53,7 +53,7 @@ Réponds UNIQUEMENT avec ce JSON exact:
         'Authorization': `Bearer ${AI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'groq/compound',
         messages: [
           {
             role: 'system',
