@@ -373,178 +373,7 @@ export async function startCharacterRushGame(roomId: string): Promise<void> {
  * Passer au thème suivant
  */
 export /**
- * Valider TOUTES les réponses du jeu en une seule fois (à la toute fin)
- */
-async function validateAllGameAnswersBatch(roomId: string): Promise<void> {
-  const db = getRequiredDb();
-  const roomRef = doc(db, 'characterRushRooms', roomId);
-  const roomSnap = await getDoc(roomRef);
-
-  if (!roomSnap.exists()) return;
-
-  const room = roomSnap.data() as CharacterRushRoom;
-
-  console.log(`🔍 Validation FINALE de TOUTES les réponses du jeu...`);
-
-  // Collecter TOUTES les réponses de TOUS les joueurs pour TOUS les thèmes
-  const allAnswersToValidate: Array<{
-    userId: string;
-    themeId: string;
-    characterName: string;
-    theme: string;
-    themeEn: string;
-    answerIndex: number;
-  }> = [];
-
-  Object.entries(room.players).forEach(([userId, player]) => {
-    Object.entries(player.answers).forEach(([themeId, answers]) => {
-      const theme = room.themes.find(t => t.id === themeId);
-      if (!theme) return;
-
-      answers.forEach((answer, index) => {
-        if (answer.validationStatus === 'pending') {
-          allAnswersToValidate.push({
-            userId,
-            themeId,
-            characterName: answer.characterName,
-            theme: theme.theme,
-            themeEn: theme.themeEn,
-            answerIndex: index,
-          });
-        }
-      });
-    });
-  });
-
-  if (allAnswersToValidate.length === 0) {
-    console.log('✅ Aucune réponse à valider');
-    return;
-  }
-
-  console.log(`🔍 ${allAnswersToValidate.length} réponses totales à valider...`);
-
-  // Préparer la requête batch avec TOUTES les réponses
-  const validationRequests = allAnswersToValidate.map(a => ({
-    characterName: a.characterName,
-    theme: a.theme,
-    themeEn: a.themeEn,
-  }));
-
-  try {
-    // Appeler l'API de validation batch UNE SEULE FOIS
-    // Construire l'URL pour les appels serveur
-    const baseUrl = typeof window === 'undefined' 
-      ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-      : ''; // Côté client, URL relative suffit
-    
-    const response = await fetch(`${baseUrl}/api/groq/validate-batch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers: validationRequests }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Batch validation failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const results = data.results || [];
-
-    console.log(`✅ Validation terminée: ${results.filter((r: any) => r.valid).length}/${results.length} valides`);
-
-    // Mettre à jour toutes les réponses dans Firebase
-    const updates: Record<string, any> = {};
-    
-    // Grouper les updates par joueur et thème
-    const playerUpdates: Record<string, Record<string, any[]>> = {};
-    
-    allAnswersToValidate.forEach((answerData, index) => {
-      const result = results[index];
-      if (!result) return;
-
-      const { userId, themeId, answerIndex } = answerData;
-      
-      if (!playerUpdates[userId]) playerUpdates[userId] = {};
-      if (!playerUpdates[userId][themeId]) {
-        playerUpdates[userId][themeId] = [...(room.players[userId].answers[themeId] || [])];
-      }
-      
-      const answers = playerUpdates[userId][themeId];
-      if (answers[answerIndex]) {
-        answers[answerIndex] = {
-          ...answers[answerIndex],
-          validationStatus: result.valid ? 'valid' : 'invalid',
-          confidence: result.confidence,
-          reason: result.reason,
-          details: result.details,
-        };
-      }
-    });
-
-    // Appliquer tous les updates
-    Object.entries(playerUpdates).forEach(([userId, themes]) => {
-      Object.entries(themes).forEach(([themeId, answers]) => {
-        updates[`players.${userId}.answers.${themeId}`] = answers;
-      });
-    });
-
-    // Recalculer les scores finaux
-    Object.entries(room.players).forEach(([userId, player]) => {
-      let totalValidAnswers = 0;
-      
-      // Utiliser les nouvelles réponses si disponibles, sinon les anciennes
-      Object.entries(player.answers).forEach(([themeId, oldAnswers]) => {
-        const answers = playerUpdates[userId]?.[themeId] || oldAnswers;
-        answers.forEach((answer) => {
-          if (answer.validationStatus === 'valid') {
-            totalValidAnswers++;
-          }
-        });
-      });
-      
-      updates[`players.${userId}.score`] = totalValidAnswers;
-    });
-
-    updates.updatedAt = Date.now();
-
-    await updateDoc(roomRef, updates);
-    console.log('✅ Firebase mis à jour avec TOUS les résultats finaux');
-
-  } catch (error) {
-    console.error('❌ Erreur validation batch finale:', error);
-    // En cas d'erreur, accepter toutes les réponses
-    const updates: Record<string, any> = {};
-    
-    allAnswersToValidate.forEach((answerData) => {
-      const { userId, themeId, answerIndex } = answerData;
-      const answers = [...(room.players[userId].answers[themeId] || [])];
-      
-      if (answers[answerIndex]) {
-        answers[answerIndex] = {
-          ...answers[answerIndex],
-          validationStatus: 'valid',
-          confidence: 0.6,
-          reason: 'Validation automatique (erreur)',
-          details: 'Accepté automatiquement suite à une erreur de validation.',
-        };
-
-        updates[`players.${userId}.answers.${themeId}`] = answers;
-      }
-    });
-
-    // Recalculer scores avec réponses acceptées
-    Object.keys(room.players).forEach((userId) => {
-      const totalAnswers = allAnswersToValidate.filter(a => a.userId === userId).length;
-      updates[`players.${userId}.score`] = (room.players[userId].score || 0) + totalAnswers;
-    });
-
-    updates.updatedAt = Date.now();
-    await updateDoc(roomRef, updates);
-  }
-}
-
-/**
- * Avancer au thème suivant (SANS validation, juste passage au suivant)
+ * Avancer au thème suivant (simple, sans validation batch)
  */
 export async function advanceToNextTheme(roomId: string): Promise<void> {
   const db = getRequiredDb();
@@ -557,19 +386,14 @@ export async function advanceToNextTheme(roomId: string): Promise<void> {
   const nextIndex = room.currentThemeIndex + 1;
 
   if (nextIndex >= room.themes.length) {
-    // Fin du jeu - passer en game_over PUIS valider
+    // Fin du jeu
     await updateDoc(roomRef, {
       state: 'game_over',
       themeStartTime: null,
       updatedAt: Date.now(),
     });
-
-    // 🔥 VALIDER TOUTES LES RÉPONSES DE TOUT LE JEU EN UNE SEULE FOIS
-    console.log('🎯 Fin du jeu! Lancement validation batch finale...');
-    await validateAllGameAnswersBatch(roomId);
-    
   } else {
-    // Thème suivant (PAS de validation ici!)
+    // Thème suivant
     await updateDoc(roomRef, {
       currentThemeIndex: nextIndex,
       themeStartTime: Date.now(),
@@ -584,7 +408,7 @@ export async function advanceToNextTheme(roomId: string): Promise<void> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Soumettre une réponse (acceptée localement, validation à la fin du thème)
+ * Soumettre une réponse (avec validation immédiate)
  */
 export async function submitCharacterAnswer(
   roomId: string,
@@ -617,11 +441,11 @@ export async function submitCharacterAnswer(
     throw new Error('Personnage déjà soumis');
   }
 
-  // Créer la nouvelle réponse (acceptée localement, validation plus tard)
+  // Créer la nouvelle réponse (en attente de validation)
   const newAnswer: CharacterRushAnswer = {
     characterName: characterName.trim(),
     submittedAt: Date.now(),
-    validationStatus: 'pending', // Sera validé à la fin du thème
+    validationStatus: 'pending',
   };
 
   // Ajouter la réponse
@@ -632,7 +456,8 @@ export async function submitCharacterAnswer(
     updatedAt: Date.now(),
   });
 
-  // PAS de validation immédiate! On valide tout en batch à la fin du thème
+  // ✅ VALIDATION IMMÉDIATE en arrière-plan
+  validateAnswerAsync(roomId, userId, themeId, characterName, currentTheme.theme, currentTheme.themeEn);
 }
 
 /**
