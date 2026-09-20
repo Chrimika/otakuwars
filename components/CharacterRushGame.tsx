@@ -117,7 +117,14 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
       soundFx.playWrong();
     } finally {
       setIsSubmitting(false);
-      inputRef.current?.focus();
+      // Refocus immédiat et forcé pour iOS/mobile
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          // Pour iOS: trigger le clavier virtuel
+          inputRef.current.click();
+        }
+      }, 10);
     }
   };
 
