@@ -163,7 +163,6 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
   };
 
   const progressPercent = ((room.currentThemeIndex + 1) / room.totalThemes) * 100;
-  const progressPercent = ((room.currentThemeIndex + 1) / room.totalThemes) * 100;
   const timerPercent = room.timerPerTheme > 0 ? (timeLeft / room.timerPerTheme) * 100 : 0;
 
   return (
