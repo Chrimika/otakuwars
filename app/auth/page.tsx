@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirebaseInstance } from '../../lib/firebase';
 import { getUserProfileFromFirestore, saveUserProfileToFirestore } from '../../lib/gameService';
 import { useAppContext } from '../../lib/AppContext';
@@ -13,9 +13,9 @@ import { OTAKU_AVATARS } from '../../data/avatars';
 import { NeonButton } from '../../components/ui/NeonButton';
 import { Panel } from '../../components/ui/Panel';
 import { KatanaIcon, ToriiIcon } from '../../components/ui/icons/OtakuIcons';
-import { ArrowLeft, ArrowRight, AlertCircle, LogIn } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertCircle, LogIn, UserPlus } from 'lucide-react';
 
-const STEP_LABELS = ['Pays', 'Sexe', 'Contact', 'Top mangas', 'Test otaku', 'Connexion'];
+const STEP_LABELS = ['Pays', 'Sexe', 'Contact', 'Top mangas', 'Test otaku', 'Compte'];
 const TEST_SIZE = 3;
 
 export default function AuthPage() {
@@ -23,6 +23,10 @@ export default function AuthPage() {
   const { setUser } = useAppContext();
 
   const [step, setStep] = useState(0);
+  const [mode, setMode] = useState<'signup' | 'login'>('signup');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [gender, setGender] = useState<'homme' | 'femme' | null>(null);
   const [city, setCity] = useState('');
   const [phone, setPhone] = useState('');
@@ -64,7 +68,7 @@ export default function AuthPage() {
     setStep((s) => Math.min(STEP_LABELS.length - 1, s + 1));
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleAuth = async () => {
     setError('');
     setLoading(true);
     const { auth, isConfigured } = getFirebaseInstance();
@@ -76,20 +80,22 @@ export default function AuthPage() {
     }
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const gUser = result.user;
+      if (mode === 'signup') {
+        // Inscription
+        if (!username.trim() || !email || !password) {
+          setError('Veuillez remplir tous les champs.');
+          setLoading(false);
+          return;
+        }
 
-      let profile = await getUserProfileFromFirestore(gUser.uid);
-      let isNewAccount = false;
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUser = result.user;
 
-      if (!profile) {
-        isNewAccount = true;
         const av = OTAKU_AVATARS[0];
-        profile = {
-          uid: gUser.uid,
-          username: gUser.displayName || `Otaku_${Math.floor(Math.random() * 9000 + 1000)}`,
-          email: gUser.email || undefined,
+        const profile: UserProfile = {
+          uid: firebaseUser.uid,
+          username: username.trim(),
+          email: firebaseUser.email || undefined,
           otakuTitle: av.title,
           avatarId: av.id,
           favoriteAnime: topManga[0] || 'One Piece',
@@ -105,15 +111,43 @@ export default function AuthPage() {
           topManga: topManga.filter(Boolean),
           otakuScore: TEST_SIZE,
         };
+
         await saveUserProfileToFirestore(profile);
+        localStorage.setItem('otakuwars_user', JSON.stringify(profile));
+        setUser(profile as UserProfile);
+        router.push('/auth/avatar');
+      } else {
+        // Connexion
+        if (!email || !password) {
+          setError('Email et mot de passe requis.');
+          setLoading(false);
+          return;
+        }
+
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        const firebaseUser = result.user;
+
+        let profile = await getUserProfileFromFirestore(firebaseUser.uid);
+        
+        if (!profile) {
+          const stored = localStorage.getItem('otakuwars_user');
+          if (stored) {
+            profile = JSON.parse(stored);
+          }
+        }
+
+        if (!profile) {
+          setError('Profil introuvable.');
+          setLoading(false);
+          return;
+        }
+
+        localStorage.setItem('otakuwars_user', JSON.stringify(profile));
+        setUser(profile as UserProfile);
+        router.push('/');
       }
-
-      localStorage.setItem('otakuwars_user', JSON.stringify(profile));
-      setUser(profile as UserProfile);
-
-      router.push(isNewAccount ? '/auth/avatar' : '/');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Connexion Google impossible.';
+      const msg = err instanceof Error ? err.message : 'Erreur d\'authentification.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -129,11 +163,13 @@ export default function AuthPage() {
         <h1 className="font-display text-3xl text-ink mb-1">Rejoindre l&apos;arène</h1>
         <p className="text-xs text-slate-500 mb-3">Quelques étapes pour prouver que tu es un vrai otaku</p>
         <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="text-xs font-hud font-bold uppercase tracking-wide text-crimson hover:brightness-125 underline underline-offset-2 cursor-pointer disabled:opacity-50"
+          onClick={() => {
+            setMode(mode === 'signup' ? 'login' : 'signup');
+            setStep(5); // Aller directement à la page de connexion
+          }}
+          className="text-xs font-hud font-bold uppercase tracking-wide text-crimson hover:brightness-125 underline underline-offset-2 cursor-pointer"
         >
-          Déjà un compte ? Continuer avec Google
+          {mode === 'signup' ? 'Déjà un compte ? Se connecter' : 'Pas encore de compte ? S\'inscrire'}
         </button>
       </div>
 
@@ -274,26 +310,78 @@ export default function AuthPage() {
           </div>
         )}
 
-        {/* Step 5: Google */}
+        {/* Step 5: Email/Password */}
         {step === 5 && (
-          <div className="text-center">
-            <h2 className="font-display text-xl text-white mb-2">Dernière étape</h2>
-            <p className="text-xs text-slate-500 mb-1">
-              Niveau otaku détecté : <span className="text-neon-gold font-bold">Légendaire</span>
+          <div>
+            <h2 className="font-display text-xl text-white mb-2 text-center">
+              {mode === 'signup' ? 'Créer ton compte' : 'Connexion'}
+            </h2>
+            <p className="text-xs text-slate-500 mb-6 text-center">
+              {mode === 'signup' 
+                ? `Niveau otaku détecté : ${answers.length === TEST_SIZE && answers.every(a => a !== null) ? 'Légendaire' : 'En cours...'}`
+                : 'Bon retour parmi nous, otaku !'}
             </p>
-            <p className="text-xs text-slate-500 mb-6">Connecte-toi avec Google pour créer ton compte.</p>
+
+            <div className="space-y-4">
+              {mode === 'signup' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1.5">Pseudo</label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Ton pseudo d'otaku"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-crimson focus:outline-none transition-colors"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="ton-email@exemple.com"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-crimson focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5">Mot de passe</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:border-crimson focus:outline-none transition-colors"
+                />
+              </div>
+            </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-neon-magenta/10 border border-neon-magenta/40 text-neon-magenta text-xs flex items-start gap-2 text-left">
+              <div className="mt-4 p-3 rounded-xl bg-neon-magenta/10 border border-neon-magenta/40 text-neon-magenta text-xs flex items-start gap-2 text-left">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
-            <NeonButton variant="primary" onClick={handleGoogleSignIn} disabled={loading} className="w-full">
-              <LogIn className="w-4 h-4" />
-              {loading ? 'Connexion...' : 'Continuer avec Google'}
+            <NeonButton 
+              variant="primary" 
+              onClick={handleAuth} 
+              disabled={loading || (mode === 'signup' && !username.trim()) || !email || !password} 
+              className="w-full mt-6"
+            >
+              {mode === 'signup' ? <UserPlus className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+              {loading ? 'Chargement...' : mode === 'signup' ? 'Créer mon compte' : 'Se connecter'}
             </NeonButton>
+
+            <button
+              onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
+              className="w-full mt-3 text-xs font-hud font-bold uppercase tracking-wide text-slate-400 hover:text-crimson transition-colors"
+            >
+              {mode === 'signup' ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire'}
+            </button>
           </div>
         )}
       </Panel>

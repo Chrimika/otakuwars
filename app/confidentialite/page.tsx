@@ -9,7 +9,7 @@ const SECTIONS = [
   },
   {
     title: 'Authentification',
-    body: 'La connexion se fait via Google (Firebase Authentication). Otaku Wars reçoit ton nom, ton email et ta photo de profil Google si tu en as une.',
+    body: 'La connexion se fait via email et mot de passe (Firebase Authentication). Otaku Wars reçoit uniquement ton email et les informations que tu fournis lors de ton inscription.',
   },
   {
     title: 'Stockage',

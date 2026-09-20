@@ -32,6 +32,17 @@ function HomeContent() {
 
   const goToAuth = () => router.push('/auth');
 
+  // Fonction pour vérifier si un salon a été créé aujourd'hui
+  const isToday = (timestamp: number): boolean => {
+    const today = new Date();
+    const roomDate = new Date(timestamp);
+    return (
+      roomDate.getDate() === today.getDate() &&
+      roomDate.getMonth() === today.getMonth() &&
+      roomDate.getFullYear() === today.getFullYear()
+    );
+  };
+
   // ── Deep link : ?code= (rejoindre direct depuis un lien partagé) ──────────
   useEffect(() => {
     if (!user) return;
@@ -146,7 +157,7 @@ function HomeContent() {
                 </button>
               </div>
 
-              {publicRooms.filter(r => r.state === 'waiting').length === 0 ? (
+              {publicRooms.filter(r => r.state === 'waiting' && isToday(r.createdAt)).length === 0 ? (
                 <Panel glow="neutral" className="py-16 text-center">
                   <Zap className="w-10 h-10 text-slate-700 mx-auto mb-3" />
                   <p className="text-slate-500 text-sm font-medium">Aucun salon ouvert</p>
@@ -154,7 +165,7 @@ function HomeContent() {
                 </Panel>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {publicRooms.filter(r => r.state === 'waiting').map((r) => {
+                  {publicRooms.filter(r => r.state === 'waiting' && isToday(r.createdAt)).map((r) => {
                     const count = Object.keys(r.players || {}).length;
                     return (
                       <Panel key={r.id} glow="crimson" className="group p-4 hover:border-crimson/60 transition-all">
@@ -300,7 +311,7 @@ function HomeContent() {
 
 function HowItWorksSection() {
   const steps = [
-    { icon: <UserPlus className="w-5 h-5 text-crimson" />, title: 'Créez un compte', desc: 'Profil otaku en quelques étapes, connexion via Google.' },
+    { icon: <UserPlus className="w-5 h-5 text-crimson" />, title: 'Créez un compte', desc: 'Profil otaku en quelques étapes, connexion par email/mot de passe.' },
     { icon: <KatanaIcon className="w-5 h-5 text-neon-gold" />, title: 'Créez ou rejoignez', desc: 'Lancez un salon ou entrez un code partagé par un ami.' },
     { icon: <ImpactBurstIcon className="w-5 h-5 text-neon-violet" />, title: 'Répondez en direct', desc: 'Compte à rebours, score de vitesse, tout le monde en simultané.' },
     { icon: <Trophy className="w-5 h-5 text-crimson" />, title: 'Grimpez au classement', desc: 'Podium de fin de partie et classement général de la communauté.' },
