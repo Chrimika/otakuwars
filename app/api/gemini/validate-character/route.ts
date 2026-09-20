@@ -23,29 +23,30 @@ export async function POST(request: NextRequest) {
 
     const prompt = `Tu valides les réponses d'un jeu d'anime. Joueur: "${characterName}" | Thème: "${theme}"
 
-🎯 RÈGLE D'OR: SI ÇA RESSEMBLE À UNE BONNE RÉPONSE, ACCEPTE-LA!
+RÈGLE D'OR: SI ÇA RESSEMBLE À UNE BONNE RÉPONSE, ACCEPTE-LA!
 
-✅ ACCEPTE (valid: true, confidence > 0.5):
+ACCEPTE (valid: true, confidence > 0.5):
 - Tous les personnages d'anime/manga qui correspondent au thème
-- Même avec fautes: "shanks", "SHANKS", "shank", "Shanx"
+- Même avec fautes: "shanks", "SHANKS", "shank"
 - Même incomplet: "hawks" pour "Hawks/Keigo Takami"
 - Surnoms: "Ace" pour "Portgas D. Ace"
-- Si tu penses que c'est probablement bon → ACCEPTE
 
-❌ REJETTE SEULEMENT (valid: false):
-- Noms complètement inventés qui n'existent pas
+REJETTE SEULEMENT (valid: false):
+- Noms complètement inventés
 - Personnages qui ne correspondent VRAIMENT PAS au thème
 - Mots génériques: "ninja", "un pirate"
 
-💡 EXEMPLES:
-- "cheveux rouges" + "shanks" → ✅ {"valid": true, "confidence": 0.95}
-- "cheveux rouges" + "SHANKS" → ✅ {"valid": true, "confidence": 0.95}
-- "capable de voler" + "hawks" → ✅ {"valid": true, "confidence": 0.95}
-- "capable de voler" + "deku" → ✅ {"valid": true, "confidence": 0.8} (peut voler avec OFA)
-- "cheveux rouges" + "goku" → ❌ {"valid": false, "confidence": 0.9}
+EXEMPLES:
+- "cheveux rouges" + "shanks" = valid true confidence 0.95
+- "capable de voler" + "hawks" = valid true confidence 0.95
+- "cheveux rouges" + "goku" = valid false confidence 0.9
 
-Réponds en JSON sans markdown:
-{"valid": true/false, "confidence": 0-1, "reason": "courte explication"}`;
+IMPORTANT: Réponds UNIQUEMENT avec ce JSON exact (pas de texte avant ou après):
+{"valid":true,"confidence":0.95,"reason":"courte explication"}
+
+OU
+
+{"valid":false,"confidence":0.9,"reason":"courte explication"}`;
 
 
 
@@ -59,6 +60,7 @@ Réponds en JSON sans markdown:
           topK: 30,
           topP: 0.9,
           maxOutputTokens: 256,
+          responseMimeType: 'application/json', // Force JSON output
         },
       }),
     });
@@ -70,15 +72,44 @@ Réponds en JSON sans markdown:
     const data = await response.json();
     const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
+    console.log('🔍 Gemini raw response:', textContent);
+
     // Nettoyer la réponse
     let cleanedText = textContent.trim();
+    
+    // Supprimer markdown
     if (cleanedText.startsWith('```json')) {
       cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
+    
+    // Supprimer tout texte avant le premier {
+    const jsonStart = cleanedText.indexOf('{');
+    if (jsonStart > 0) {
+      cleanedText = cleanedText.substring(jsonStart);
+    }
+    
+    // Supprimer tout texte après le dernier }
+    const jsonEnd = cleanedText.lastIndexOf('}');
+    if (jsonEnd > 0) {
+      cleanedText = cleanedText.substring(0, jsonEnd + 1);
+    }
 
-    const parsed = JSON.parse(cleanedText);
+    console.log('🔍 Cleaned text:', cleanedText);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error('❌ JSON parse error:', parseError, 'Text:', cleanedText);
+      // Si parse échoue, accepter par défaut (mode permissif)
+      return NextResponse.json({
+        valid: true,
+        confidence: 0.6,
+        reason: 'Validation automatique (erreur de parsing)',
+      });
+    }
 
     // Appliquer un seuil de confidence PERMISSIF
     const confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;
