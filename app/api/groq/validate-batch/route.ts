@@ -125,7 +125,15 @@ Réponds en JSON:
 
     let parsed;
     try {
-      parsed = JSON.parse(textContent);
+      // Nettoyer les balises markdown ```json ... ``` si présentes
+      let cleanedContent = textContent.trim();
+      if (cleanedContent.startsWith('```json')) {
+        cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedContent.startsWith('```')) {
+        cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      parsed = JSON.parse(cleanedContent);
     } catch (parseError) {
       console.error('❌ JSON parse error:', parseError);
       // Fallback: accepter toutes les réponses
