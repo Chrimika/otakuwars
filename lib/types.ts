@@ -103,3 +103,70 @@ export interface PlayerScoreSummary {
   accuracy: number;
   rank: number;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RAFALE OTAKU - Character Rush Game Types
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface CharacterRushTheme {
+  id: string;
+  theme: string; // Ex: "Personnages aux cheveux rouges"
+  themeEn: string; // Version anglaise pour validation
+}
+
+export interface CharacterRushAnswer {
+  characterName: string;
+  submittedAt: number; // Timestamp
+  validationStatus: 'pending' | 'valid' | 'invalid';
+  validationReason?: string;
+  validationConfidence?: number;
+}
+
+export interface CharacterRushPlayer {
+  uid: string;
+  username: string;
+  otakuTitle: string;
+  avatarId: string;
+  isHost: boolean;
+  isReady: boolean;
+  score: number; // Nombre total de personnages valides
+  answers: Record<string, CharacterRushAnswer[]>; // themeId -> array of answers
+  joinedAt: number;
+  currentThemeIndex?: number;
+  hasFinishedCurrentTheme?: boolean;
+}
+
+export type CharacterRushRoomStatus = 'waiting' | 'playing' | 'theme_ended' | 'game_over';
+
+export interface CharacterRushRoom {
+  id: string;
+  code: string;
+  name: string;
+  hostId: string;
+  hostName: string;
+  timerPerTheme: number; // Secondes par thème (défaut: 15)
+  totalThemes: number; // Nombre de thèmes (défaut: 20)
+  currentThemeIndex: number;
+  state: CharacterRushRoomStatus;
+  themes: CharacterRushTheme[];
+  themeStartTime: number | null; // Timestamp début du thème actuel
+  players: Record<string, CharacterRushPlayer>;
+  createdAt: number;
+  updatedAt: number;
+  isGeneratingThemes?: boolean; // Pendant la génération par Gemini
+}
+
+export interface CharacterRushScoreSummary {
+  uid: string;
+  username: string;
+  otakuTitle: string;
+  avatarId: string;
+  totalScore: number; // Nombre total de personnages valides
+  totalAnswers: number; // Nombre total de réponses soumises
+  accuracy: number; // Pourcentage de bonnes réponses
+  rank: number;
+  bestTheme?: {
+    theme: string;
+    score: number;
+  };
+}

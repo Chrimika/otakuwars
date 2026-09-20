@@ -10,6 +10,7 @@ import { KatanaIcon } from './ui/icons/OtakuIcons';
 import { LogIn, Trophy } from 'lucide-react';
 
 const NAV_LINKS = [
+  { href: '/rafale-otaku', label: 'Rafale Otaku' },
   { href: '/evenements', label: 'Événements' },
   { href: '/bibliotheque', label: 'Bibliothèque' },
   { href: '/boutique', label: 'Boutique' },

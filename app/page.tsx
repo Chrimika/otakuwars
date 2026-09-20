@@ -201,6 +201,55 @@ function HomeContent() {
               )}
             </section>
 
+            {/* Nouveau mode - Rafale Otaku */}
+            <section className="mb-20">
+              <Panel glow="magenta" className="p-6 sm:p-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-neon-magenta/10 rounded-full blur-3xl -z-10" />
+                <div className="grid md:grid-cols-[1fr,auto] gap-6 items-center">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 clip-corner-sm bg-neon-magenta/20 border border-neon-magenta/40 text-neon-magenta text-xs font-hud font-bold uppercase tracking-wider mb-3">
+                      <Zap className="w-3.5 h-3.5" />
+                      Nouveau mode de jeu
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-display font-black text-white mb-2">
+                      Rafale Otaku
+                    </h2>
+                    <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                      Un thème, 15 secondes, citez un maximum de personnages d&apos;anime ! 
+                      L&apos;IA Gemini génère des défis créatifs et valide vos réponses en temps réel.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1.5 rounded-lg">
+                        <Zap className="w-3.5 h-3.5 text-neon-magenta" />
+                        Thèmes générés par IA
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1.5 rounded-lg">
+                        <Clock className="w-3.5 h-3.5 text-neon-gold" />
+                        Validation instantanée
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1.5 rounded-lg">
+                        <Users className="w-3.5 h-3.5 text-neon-violet" />
+                        Multijoueur
+                      </span>
+                    </div>
+                    <NeonButton 
+                      variant="primary" 
+                      onClick={() => router.push('/rafale-otaku')}
+                      className="bg-neon-magenta! border-neon-magenta!"
+                    >
+                      <Zap className="w-4 h-4" />
+                      Découvrir Rafale Otaku
+                    </NeonButton>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="clip-corner-sm w-32 h-32 bg-neon-magenta/20 border-2 border-neon-magenta/40 flex items-center justify-center">
+                      <Zap className="w-16 h-16 text-neon-magenta animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              </Panel>
+            </section>
+
             {/* Avatars */}
             <section className="mb-20">
               <h2 className="text-base font-hud font-bold uppercase tracking-wide text-white mb-5 flex items-center gap-2">
