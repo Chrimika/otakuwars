@@ -370,9 +370,6 @@ export async function startCharacterRushGame(roomId: string): Promise<void> {
 }
 
 /**
- * Passer au thème suivant
- */
-export /**
  * Avancer au thème suivant (simple, sans validation batch)
  */
 export async function advanceToNextTheme(roomId: string): Promise<void> {
