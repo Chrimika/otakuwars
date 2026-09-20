@@ -239,8 +239,8 @@ export async function resetCharacterRushRoom(roomId: string): Promise<void> {
   Object.entries(room.players || {}).forEach(([uid, player]) => {
     resetPlayers[uid] = {
       ...player,
-      ready: false,
-      answers: [],
+      isReady: false, // Corrigé: isReady au lieu de ready
+      answers: {}, // Objet vide, pas array
       score: 0,
     };
   });
