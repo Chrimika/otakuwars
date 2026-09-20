@@ -9,6 +9,7 @@ import {
   query,
   where,
   limit,
+  addDoc,
   Firestore,
 } from 'firebase/firestore';
 import { GameRoom, RoomPlayer, UserProfile } from './types';
@@ -432,5 +433,37 @@ export async function getGlobalLeaderboard(limitCount = 50): Promise<UserProfile
     console.error('❌ Erreur récupération classement général :', e);
   }
   return [];
+}
+
+// ── 11. Demandes de partenariat ───────────────────────────────────────────────
+
+export interface PartnerRequest {
+  name: string;
+  email: string;
+  message: string;
+  createdAt: number;
+}
+
+export async function submitPartnerRequest(req: Omit<PartnerRequest, 'createdAt'>) {
+  const { db, isConfigured } = getFirebaseInstance();
+  if (isConfigured && db) {
+    await addDoc(collection(db as Firestore, 'partnerRequests'), { ...req, createdAt: Date.now() });
+  }
+}
+
+// ── 12. Boîte à suggestions ───────────────────────────────────────────────────
+
+export interface Suggestion {
+  category: string;
+  message: string;
+  contact?: string;
+  createdAt: number;
+}
+
+export async function submitSuggestion(s: Omit<Suggestion, 'createdAt'>) {
+  const { db, isConfigured } = getFirebaseInstance();
+  if (isConfigured && db) {
+    await addDoc(collection(db as Firestore, 'suggestions'), { ...s, createdAt: Date.now() });
+  }
 }
 

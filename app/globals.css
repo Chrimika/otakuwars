@@ -1,16 +1,226 @@
 @import "tailwindcss";
 
+@theme {
+  --font-display: var(--font-anton), sans-serif;
+  --font-hud: var(--font-rajdhani), sans-serif;
+
+  --color-void: #0a0808;
+  --color-void-2: #120e0e;
+  --color-crimson: #ff1f3d;
+  --color-neon-magenta: #ff2e88;
+  --color-neon-violet: #8b5cf6;
+  --color-neon-gold: #ffb020;
+  --color-ink: #f5efe6;
+  --color-muted: #a89a91;
+}
+
 :root {
-  --background: #0a0a0f;
+  --background: var(--color-void);
 }
 
 body {
-  background: var(--background);
-  color: #f1f5f9;
+  background: var(--color-void);
+  color: var(--color-ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
+
+.font-jp {
+  font-family: 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+}
+
+/* ─── Ambient backdrop: faint warm halftone + vignette ─────────────────────── */
+.hud-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--color-void);
+  background-image: radial-gradient(rgba(255, 31, 61, 0.12) 1px, transparent 1.4px);
+  background-size: 16px 16px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 100%);
+}
+
+/* ─── Manga halftone: heavier dot screen for the hero ───────────────────────── */
+.manga-halftone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 31, 61, 0.35) 1.6px, transparent 1.8px);
+  background-size: 10px 10px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 0%, transparent 75%);
+  opacity: 0.5;
+}
+
+/* ─── Speed lines radiating behind the hero title ───────────────────────────── */
+.speed-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 31, 61, 0.14) 0deg 1.2deg,
+    transparent 1.2deg 9deg
+  );
+  mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 62%);
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 62%);
+}
+
+/* ─── Torn comic-panel edge divider ──────────────────────────────────────────── */
+.torn-edge {
+  height: 22px;
+  width: 100%;
+  background:
+    linear-gradient(135deg, var(--color-void) 50%, transparent 50%) 0 0 / 26px 26px repeat-x,
+    linear-gradient(-135deg, var(--color-void) 50%, transparent 50%) 0 0 / 26px 26px repeat-x;
+}
+
+/* ─── Neon glow utilities ───────────────────────────────────────────────────── */
+.glow-crimson { box-shadow: 0 0 0 1px rgba(255, 31, 61, 0.45), 0 0 16px rgba(255, 31, 61, 0.3), 0 0 40px rgba(255, 31, 61, 0.12); }
+.glow-magenta { box-shadow: 0 0 0 1px rgba(255, 46, 136, 0.4), 0 0 16px rgba(255, 46, 136, 0.25), 0 0 40px rgba(255, 46, 136, 0.1); }
+.glow-violet { box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 0 16px rgba(139, 92, 246, 0.25), 0 0 40px rgba(139, 92, 246, 0.1); }
+.glow-gold { box-shadow: 0 0 0 1px rgba(255, 176, 32, 0.45), 0 0 16px rgba(255, 176, 32, 0.3), 0 0 40px rgba(255, 176, 32, 0.12); }
+
+.text-glow-crimson { text-shadow: 0 0 12px rgba(255, 31, 61, 0.65), 0 0 32px rgba(255, 31, 61, 0.3); }
+.text-glow-gold { text-shadow: 0 0 12px rgba(255, 176, 32, 0.6), 0 0 32px rgba(255, 176, 32, 0.25); }
+
+/* ─── Angular "cut corner" HUD silhouette ──────────────────────────────────── */
+.clip-corner {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.clip-corner-sm {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+/* ─── Corner brackets (targeting-reticle style) on panels/modals ──────────── */
+.hud-panel {
+  position: relative;
+}
+.hud-panel::before,
+.hud-panel::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+.hud-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--bracket-color, var(--color-crimson));
+  border-left: 2px solid var(--bracket-color, var(--color-crimson));
+}
+.hud-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--bracket-color, var(--color-crimson));
+  border-right: 2px solid var(--bracket-color, var(--color-crimson));
+}
+
+/* ─── Comic print misregistration effect for the hero title ────────────────── */
+.comic-offset-text {
+  position: relative;
+  display: inline-block;
+}
+.comic-offset-text::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: var(--color-crimson);
+  transform: translate(5px, 5px);
+}
+
+/* ─── Glitch effect (chromatic split), used sparingly for small accents ─────── */
+@keyframes glitch-1 {
+  0%, 92%, 100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
+  93% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 0); }
+  95% { clip-path: inset(60% 0 10% 0); transform: translate(2px, 0); }
+  97% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 0); }
+}
+@keyframes glitch-2 {
+  0%, 92%, 100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
+  93% { clip-path: inset(70% 0 5% 0); transform: translate(2px, 0); }
+  95% { clip-path: inset(5% 0 80% 0); transform: translate(-2px, 0); }
+  97% { clip-path: inset(40% 0 40% 0); transform: translate(1px, 0); }
+}
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+}
+.glitch-text::before {
+  color: var(--color-crimson);
+  animation: glitch-1 4.5s infinite linear;
+}
+.glitch-text::after {
+  color: var(--color-neon-magenta);
+  animation: glitch-2 4.5s infinite linear;
+}
+
+/* ─── Intro sequence keyframes ───────────────────────────────────────────────── */
+@keyframes intro-ink-wipe {
+  0% { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+}
+@keyframes intro-slam {
+  0% { opacity: 0; transform: scale(2.4) rotate(-4deg); }
+  55% { opacity: 1; transform: scale(0.94) rotate(1.5deg); }
+  70% { transform: scale(1.04) rotate(-1deg); }
+  85% { transform: scale(0.99) rotate(0.4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes intro-burst {
+  0% { opacity: 0; transform: scale(0.3); }
+  40% { opacity: 0.9; }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+@keyframes intro-slash {
+  0% { transform: translateX(-120%) skewX(-12deg); opacity: 0; }
+  15% { opacity: 1; }
+  60% { transform: translateX(120%) skewX(-12deg); opacity: 1; }
+  100% { transform: translateX(220%) skewX(-12deg); opacity: 0; }
+}
+.intro-slash { animation: intro-slash 0.7s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+
+@keyframes intro-exit-wipe {
+  0% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
+  100% { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); opacity: 1; }
+}
+.intro-ink-wipe { animation: intro-ink-wipe 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+.intro-slam { animation: intro-slam 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both; }
+.intro-burst { animation: intro-burst 0.9s ease-out 0.55s both; }
+.intro-exit { animation: intro-exit-wipe 0.55s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+
+/* ─── Calm reader ambience ───────────────────────────────────────────────────── */
+@keyframes calm-breathe {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+.calm-breathe { animation: calm-breathe 7s ease-in-out infinite; }
+
+@keyframes calm-drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(12px, -10px); }
+  100% { transform: translate(0, 0); }
+}
+.calm-drift { animation: calm-drift 12s ease-in-out infinite; }
+
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.page-turn { animation: page-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -21,8 +231,8 @@ body {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Subtle scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2d2d3a; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #4c4c5e; }
+::-webkit-scrollbar-thumb { background: rgba(255, 31, 61, 0.35); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 31, 61, 0.6); }
