@@ -639,8 +639,8 @@ async function validateAnswerAsync(
     answers[answerIndex] = {
       ...answers[answerIndex],
       validationStatus: result.valid ? 'valid' : 'invalid',
-      validationReason: result.reason,
-      validationConfidence: result.confidence,
+      reason: result.reason,
+      confidence: result.confidence,
     };
 
     // Calculer le nouveau score
