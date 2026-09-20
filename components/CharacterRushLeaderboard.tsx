@@ -169,12 +169,15 @@ export const CharacterRushLeaderboard: React.FC<CharacterRushLeaderboardProps> =
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             <NeonButton variant="primary" className="flex-1" onClick={onRematch}>
-              <RefreshCw className="w-4 h-4" /> Nouvelle partie
+              <RefreshCw className="w-4 h-4" /> Nouvelle partie (nouveaux thèmes)
             </NeonButton>
             <NeonButton variant="ghost" className="flex-1" onClick={onHome}>
               <Home className="w-4 h-4" /> Accueil
             </NeonButton>
           </div>
+          <p className="text-xs text-slate-500 text-center mt-2">
+            💡 Astuce: Créer un nouveau salon génère des thèmes complètement différents!
+          </p>
         </div>
 
         {/* Player Details */}

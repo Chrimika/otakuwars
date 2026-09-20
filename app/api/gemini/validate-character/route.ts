@@ -21,51 +21,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Tu es un expert en animes et mangas qui valide les réponses des joueurs. Un joueur a proposé "${characterName}" pour le thème: "${theme}" (${themeEn}).
+    const prompt = `Tu valides les réponses d'un jeu d'anime. Joueur: "${characterName}" | Thème: "${theme}"
 
-🎯 TA MISSION: Être JUSTE et ÉQUITABLE, pas trop strict!
+🎯 RÈGLE D'OR: SI ÇA RESSEMBLE À UNE BONNE RÉPONSE, ACCEPTE-LA!
 
-✅ ACCEPTE SI:
-1. Le personnage existe vraiment dans un anime/manga
-2. Il correspond bien au thème demandé
-3. Même avec des fautes de frappe ou majuscules manquantes
-4. Même si c'est un surnom connu du personnage
+✅ ACCEPTE (valid: true, confidence > 0.5):
+- Tous les personnages d'anime/manga qui correspondent au thème
+- Même avec fautes: "shanks", "SHANKS", "shank", "Shanx"
+- Même incomplet: "hawks" pour "Hawks/Keigo Takami"
+- Surnoms: "Ace" pour "Portgas D. Ace"
+- Si tu penses que c'est probablement bon → ACCEPTE
 
-❌ REJETTE SEULEMENT SI:
-1. Le nom est complètement inventé ou n'existe pas
-2. Le personnage ne correspond PAS DU TOUT au thème
-3. C'est un nom trop générique ("ninja", "un samourai")
+❌ REJETTE SEULEMENT (valid: false):
+- Noms complètement inventés qui n'existent pas
+- Personnages qui ne correspondent VRAIMENT PAS au thème
+- Mots génériques: "ninja", "un pirate"
 
-💡 TOLÉRANCES:
-- ✅ Majuscules/minuscules: "naruto" = "Naruto" = "NARUTO"
-- ✅ Fautes mineures: "Sangoku" = "Goku", "Natsu" = "Natsu"
-- ✅ Accents oubliés: "Eren" = "Eren"
-- ✅ Surnoms: "Mugiwara" pour Luffy, "Roi des Pirates" pour Roger
-- ✅ Noms incomplets mais clairs: "Zoro" pour "Roronoa Zoro"
-- ✅ Ordre prénom/nom: "Naruto Uzumaki" = "Uzumaki Naruto"
+💡 EXEMPLES:
+- "cheveux rouges" + "shanks" → ✅ {"valid": true, "confidence": 0.95}
+- "cheveux rouges" + "SHANKS" → ✅ {"valid": true, "confidence": 0.95}
+- "capable de voler" + "hawks" → ✅ {"valid": true, "confidence": 0.95}
+- "capable de voler" + "deku" → ✅ {"valid": true, "confidence": 0.8} (peut voler avec OFA)
+- "cheveux rouges" + "goku" → ❌ {"valid": false, "confidence": 0.9}
 
-🎲 CONFIDENCE (0-1):
-- 0.9-1.0 = Tu es sûr à 90%+
-- 0.7-0.89 = Probable à 70-89%
-- 0.5-0.69 = Pas sûr (50-69%)
-- 0-0.49 = Probablement faux
+Réponds en JSON sans markdown:
+{"valid": true/false, "confidence": 0-1, "reason": "courte explication"}`;
 
-⚠️ IMPORTANT: Sois GÉNÉREUX! Si tu penses que c'est probablement bon, ACCEPTE avec confidence > 0.7
-
-Réponds en JSON (sans markdown):
-{
-  "valid": true ou false,
-  "confidence": nombre entre 0 et 1,
-  "reason": "Courte explication"
-}
-
-Exemples:
-✅ "cheveux rouges" + "shanks" → {"valid": true, "confidence": 0.95, "reason": "Shanks (One Piece) a les cheveux rouges"}
-✅ "cheveux rouges" + "SHANKS" → {"valid": true, "confidence": 0.95, "reason": "Shanks (One Piece) a les cheveux rouges"}
-✅ "sabreurs" + "zoro" → {"valid": true, "confidence": 0.98, "reason": "Zoro est un sabreur légendaire"}
-❌ "cheveux rouges" + "goku" → {"valid": false, "confidence": 0.95, "reason": "Goku a les cheveux noirs"}
-❌ "sabreurs" + "ninja" → {"valid": false, "confidence": 0.9, "reason": "Trop générique"}
-✅ "utilisateurs de feu" + "ace" → {"valid": true, "confidence": 0.95, "reason": "Ace utilise le Mera Mera no Mi (feu)"}`;
 
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
@@ -74,9 +55,9 @@ Exemples:
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.2, // Équilibré entre cohérence et tolérance
-          topK: 20,
-          topP: 0.8,
+          temperature: 0.3, // Plus de tolérance
+          topK: 30,
+          topP: 0.9,
           maxOutputTokens: 256,
         },
       }),
@@ -99,9 +80,11 @@ Exemples:
 
     const parsed = JSON.parse(cleanedText);
 
-    // Appliquer un seuil de confidence équilibré
+    // Appliquer un seuil de confidence PERMISSIF
     const confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;
-    const isValid = parsed.valid === true && confidence >= 0.6; // Minimum 60% de confiance (équilibré)
+    const isValid = parsed.valid === true && confidence >= 0.5; // Minimum 50% de confiance (permissif)
+
+    console.log('🔍 Validation:', characterName, 'pour', theme, '→', isValid ? '✅ ACCEPTÉ' : '❌ REFUSÉ', `(${Math.round(confidence * 100)}%)`);
 
     return NextResponse.json({
       valid: isValid,
