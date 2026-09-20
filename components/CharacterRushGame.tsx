@@ -150,7 +150,6 @@ export const CharacterRushGame: React.FC<CharacterRushGameProps> = ({
           }
         }
       }, 10);
-      }, 10);
     }
   };
 
