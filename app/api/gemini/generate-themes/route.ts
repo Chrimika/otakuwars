@@ -85,7 +85,15 @@ Réponds en JSON:
 
     console.log('✅ Groq response received, parsing JSON...');
 
-    const parsed = JSON.parse(textContent);
+    // Nettoyer les balises markdown ```json ... ``` si présentes
+    let cleanedContent = textContent.trim();
+    if (cleanedContent.startsWith('```json')) {
+      cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedContent.startsWith('```')) {
+      cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const parsed = JSON.parse(cleanedContent);
     const allThemes = parsed.themes || [];
 
     // MÉLANGER ALÉATOIREMENT et prendre seulement le nombre demandé
